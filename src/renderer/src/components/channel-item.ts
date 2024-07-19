@@ -1,0 +1,64 @@
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { THEME } from '../assets/theme';
+
+@customElement('channel-item')
+export class ChannelItem extends LitElement {
+  tabIndex = 0;
+
+  @property()
+  logo?: string;
+
+  @property()
+  name?: string;
+
+  static styles = css`
+    :host {
+      background-color: ${THEME.BG_SECONDARY_COLOR};
+      padding: 15px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 15px;
+      user-select: none;
+    }
+    :host(:hover) {
+      background-color: ${THEME.BG_SECONDARY_HOVER_COLOR};
+    }
+    :host(:focus) {
+      outline: 2px solid ${THEME.PRIMARY_COLOR};
+      outline-offset: 2px;
+    }
+    :host .logo {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ${THEME.CHANNEL_BG_COLOR};
+      border-radius: 5px;
+      padding: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    :host .logo img {
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      max-width: 150px;
+    }
+    :host h3 {
+      margin: 0;
+      text-align: center;
+    }
+  `;
+
+  protected render(): unknown {
+    return html`
+      <div class="logo">
+        <img src="${this.logo}" alt="" />
+      </div>
+      <h3>${this.name}</h3>
+    `;
+  }
+}

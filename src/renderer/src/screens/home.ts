@@ -1,0 +1,54 @@
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import '../components/filter-list';
+import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
+import { FILTER_TYPE } from '../../../preload/iptv.type';
+import '../components/channel-list';
+
+@customElement('home-screen')
+export class HomeScreen extends LitElement {
+  @property()
+  filter: FILTER_TYPE = 'country';
+
+  @property()
+  code?: string = 'ID';
+
+  private _onChangeFilter = (e: CustomEvent) => {
+    this.filter = e.detail.filter;
+    this.code = undefined;
+  };
+
+  static styles = [
+    SCROLLBAR_STYLE,
+    css`
+      :host {
+        display: flex;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        background-color: ${THEME.BG_COLOR};
+        color: ${THEME.FG_COLOR};
+      }
+      :host filter-list {
+        width: 300px;
+        height: 100vh;
+        overflow-y: scroll;
+        border-right: 1px solid ${THEME.BG_SECONDARY_COLOR};
+      }
+      :host channel-list {
+        flex: 1;
+        height: 100vh;
+        overflow-y: scroll;
+      }
+    `
+  ];
+  protected render(): unknown {
+    return html`<filter-list
+        filter="${this.filter}"
+        @changeFilter="${this._onChangeFilter}"
+        code="${this.code}"
+        @changeCode="${(e: CustomEvent) => (this.code = e.detail.code)}"
+      ></filter-list>
+      <channel-list type="${this.filter}" code="${this.code}"></channel-list>`;
+  }
+}
