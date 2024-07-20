@@ -1,5 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import type { API } from './iptv.type';
+import type { API } from './api.type';
 
 declare global {
   interface Window {

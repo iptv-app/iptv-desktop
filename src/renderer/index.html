@@ -6,7 +6,7 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src * data:;font-src 'self' data:;"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:;font-src 'self' data:;media-src * blob: data:;connect-src *;"
     />
     <style>
       :root {
@@ -20,7 +20,7 @@
     </style>
   </head>
   <body>
-    <home-screen></home-screen>
-    <script type="module" src="./src/screens/home.ts"></script>
+    <app-router></app-router>
+    <script type="module" src="./src/router.ts"></script>
   </body>
 </html>

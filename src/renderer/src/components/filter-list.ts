@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Task } from '@lit/task';
 import './filter-item';
-import { THEME } from '../assets/theme';
+import { INPUT_FOCUS_STYLE, INPUT_STYLE, THEME } from '../assets/theme';
 import './filter-select';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 
@@ -102,16 +102,10 @@ export class FilterList extends LitElement {
       padding: 20px 0;
     }
     :host header input {
-      width: 100%;
-      box-sizing: border-box;
-      background-color: transparent;
-      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
-      border-radius: 5px;
-      padding: 10px;
+      ${INPUT_STYLE}
     }
     :host header input:focus {
-      outline: 2px solid ${THEME.PRIMARY_COLOR};
-      outline-offset: 2px;
+      ${INPUT_FOCUS_STYLE}
     }
     :host .items {
       padding: 10px;

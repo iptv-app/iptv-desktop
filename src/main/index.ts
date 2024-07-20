@@ -2,9 +2,17 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import { getAllCategory, getAllCountry, getAllLanguage, getFilteredActiveChannel } from './iptv';
+import {
+  getAllCategory,
+  getAllCountry,
+  getAllLanguage,
+  getFilteredActiveChannel,
+  getSingleChannelWithStream
+} from './iptv';
+import config from './config';
+import { FILTER_TYPE } from '../preload/iptv.type';
 
-function createWindow(): void {
+function createWindow(path: string): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1280,
@@ -13,9 +21,35 @@ function createWindow(): void {
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false
     }
+  });
+
+  // CORS
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const responseHeaders: { [key: string]: string | string[] } = {};
+
+    for (const key in details.responseHeaders) {
+      if (
+        key.toLowerCase() !== 'access-control-allow-origin' &&
+        key.toLowerCase() !== 'access-control-allow-headers'
+      ) {
+        responseHeaders[key] = details.responseHeaders[key];
+      }
+    }
+
+    responseHeaders['Access-Control-Allow-Origin'] = ['*'];
+    responseHeaders['Access-Control-Allow-Headers'] = ['*'];
+
+    var statusLine: string | undefined = undefined;
+    if (details.method === 'OPTIONS') {
+      statusLine = 'HTTP/1.1 200 OK';
+    }
+    callback({
+      responseHeaders,
+      statusLine
+    });
   });
 
   mainWindow.on('ready-to-show', () => {
@@ -30,9 +64,9 @@ function createWindow(): void {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/' + path);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(join(__dirname, '../renderer/' + path));
   }
 }
 
@@ -62,13 +96,29 @@ app.whenReady().then(() => {
   ipcMain.handle('getFilteredActiveChannel', (_e, type, code) =>
     getFilteredActiveChannel(type, code)
   );
+  ipcMain.handle('getSingleChannelWithStream', (_e, channel) =>
+    getSingleChannelWithStream(channel)
+  );
+  ipcMain.handle('setIptvView', (_e, type: FILTER_TYPE, code: string) => {
+    config.data.iptvView.filter = type;
+    config.data.iptvView.code = code;
+    config.write();
+  });
 
-  createWindow();
+  const iptvView = config.data.iptvView;
+  var hash = '#home/' + iptvView.filter;
+  if (iptvView.code) {
+    hash = hash + '/' + iptvView.code;
+  }
+
+  const homePath = 'index.html' + hash;
+
+  createWindow(homePath);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(homePath);
   });
 });
 

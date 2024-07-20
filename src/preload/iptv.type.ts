@@ -38,11 +38,7 @@ export type IPTVStream = {
   http_referrer?: string;
   user_agent?: string;
 };
-export type FILTER_TYPE = 'country' | 'category' | 'language';
-
-export type API = {
-  getAllCountry: () => Promise<IPTVCountry[]>;
-  getAllCategory: () => Promise<IPTVCategory[]>;
-  getAllLanguage: () => Promise<IPTVLanguage[]>;
-  getFilteredActiveChannel: (type: FILTER_TYPE, code: string) => Promise<IPTVChannel[]>;
+export type IPTVChannelWithStream = IPTVChannel & {
+  streams: IPTVStream[];
 };
+export type FILTER_TYPE = 'country' | 'category' | 'language';

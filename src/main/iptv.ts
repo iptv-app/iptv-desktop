@@ -4,6 +4,7 @@ import {
   FILTER_TYPE,
   IPTVCategory,
   IPTVChannel,
+  IPTVChannelWithStream,
   IPTVCountry,
   IPTVLanguage,
   IPTVStream
@@ -59,7 +60,12 @@ const getAllStreams = async () => {
 const getChannelWithStream = async () => {
   const [channels, streams] = await Promise.all([getAllChannel(), getAllStreams()]);
 
-  return channels.filter((item) => streams.find((it) => it.channel === item.id));
+  const streamChannelIds = new Set();
+  streams.forEach((stream) => {
+    streamChannelIds.add(stream.channel);
+  });
+
+  return channels.filter((item) => streamChannelIds.has(item.id));
 };
 export const getFilteredActiveChannel = async (type: FILTER_TYPE, code: string) => {
   switch (type) {
@@ -82,4 +88,19 @@ export const getFilteredActiveChannel = async (type: FILTER_TYPE, code: string) 
   const channels = await getChannelWithStream();
 
   return channels.filter(filterFn);
+};
+
+export const getSingleChannelWithStream = async (
+  channelId: string
+): Promise<IPTVChannelWithStream> => {
+  const channels = await getAllChannel();
+  const channel = channels.find((item) => item.id === channelId);
+  if (!channel) throw new Error("Can't find channel!");
+
+  const streams = await getAllStreams();
+
+  return {
+    ...channel,
+    streams: streams.filter((it) => it.channel === channelId)
+  };
 };

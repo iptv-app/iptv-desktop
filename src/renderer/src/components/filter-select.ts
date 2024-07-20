@@ -87,7 +87,7 @@ export class FilterSelect extends LitElement {
 
   protected render(): unknown {
     return html` <h2 class="label" @click="${this._toggleOpen}">
-        ${this.value && TYPES[this.value] ? TYPES[this.value] : 'Choose..'}
+        ${this.value && TYPES[this.value] ? TYPES[this.value] : 'Choose...'}
         ${unsafeHTML(ChevronDown)}
       </h2>
       <ul class="${this._isOpen ? 'open' : ''}">

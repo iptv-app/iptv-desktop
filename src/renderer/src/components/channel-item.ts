@@ -6,6 +6,16 @@ import { THEME } from '../assets/theme';
 export class ChannelItem extends LitElement {
   tabIndex = 0;
 
+  constructor() {
+    super();
+
+    this.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        this.click();
+      }
+    });
+  }
+
   @property()
   logo?: string;
 
@@ -56,7 +66,7 @@ export class ChannelItem extends LitElement {
   protected render(): unknown {
     return html`
       <div class="logo">
-        <img src="${this.logo}" alt="" />
+        <img onerror="this.src='/assets/logo-placeholder.png'" src="${this.logo}" alt="" />
       </div>
       <h3>${this.name}</h3>
     `;

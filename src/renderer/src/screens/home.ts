@@ -4,6 +4,7 @@ import '../components/filter-list';
 import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import '../components/channel-list';
+import { navigate } from '../utils/routing';
 
 @customElement('home-screen')
 export class HomeScreen extends LitElement {
@@ -11,11 +12,22 @@ export class HomeScreen extends LitElement {
   filter: FILTER_TYPE = 'country';
 
   @property()
-  code?: string = 'ID';
+  code?: string;
 
   private _onChangeFilter = (e: CustomEvent) => {
-    this.filter = e.detail.filter;
-    this.code = undefined;
+    const newFilter = e.detail.filter;
+    if (newFilter !== this.filter) {
+      navigate('home/' + newFilter);
+      window.api.setIptvView(newFilter);
+    }
+  };
+
+  private _onChangeCode = (e: CustomEvent) => {
+    const newCode = e.detail.code;
+    if (newCode !== this.code) {
+      navigate('home/' + this.filter + '/' + newCode);
+      window.api.setIptvView(this.filter, newCode);
+    }
   };
 
   static styles = [
@@ -47,7 +59,7 @@ export class HomeScreen extends LitElement {
         filter="${this.filter}"
         @changeFilter="${this._onChangeFilter}"
         code="${this.code}"
-        @changeCode="${(e: CustomEvent) => (this.code = e.detail.code)}"
+        @changeCode="${this._onChangeCode}"
       ></filter-list>
       <channel-list type="${this.filter}" code="${this.code}"></channel-list>`;
   }

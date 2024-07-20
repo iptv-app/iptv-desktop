@@ -1,6 +1,7 @@
 {
   "name": "iptv-desktop",
   "version": "1.0.0",
+  "type": "module",
   "description": "A minimal Electron application with TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -24,7 +25,9 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
     "@lit/task": "^1.0.1",
+    "hls.js": "^1.5.13",
     "lit": "^3.1.4",
+    "lowdb": "^7.0.1",
     "lucide-static": "^0.411.0"
   },
   "devDependencies": {
