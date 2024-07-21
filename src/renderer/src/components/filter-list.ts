@@ -45,6 +45,9 @@ export class FilterList extends LitElement {
     this._search = '';
     this._searchDebounced = '';
     clearTimeout(this._searchDebounceId);
+    this.scrollTo({
+      top: 0
+    });
   };
 
   private _searchDebounceId?: NodeJS.Timeout;
@@ -92,7 +95,7 @@ export class FilterList extends LitElement {
     if (this.code) {
       waitForElement(this.shadowRoot!, '#item-' + this.code, FilterList.abortScroll.signal).then(
         (el) => {
-          const position = el.getBoundingClientRect().top - 200;
+          const position = el.offsetTop - 200;
           this.scrollTo({
             top: position
           });

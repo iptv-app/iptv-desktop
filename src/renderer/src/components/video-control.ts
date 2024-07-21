@@ -14,6 +14,7 @@ import {
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import './channel-list';
+import { dispatchEvent, ECustomEvent } from '../utils/event';
 
 @customElement('video-control')
 export class VideoControl extends LitElement {
@@ -100,7 +101,8 @@ export class VideoControl extends LitElement {
   };
 
   private _updateFullScreenState = () => {
-    this._isFullScreen = document.fullscreenElement !== null;
+    const isFullScreen = document.fullscreenElement !== null;
+    this._isFullScreen = isFullScreen;
   };
   private _toggleFullScreen = async () => {
     if (!document.fullscreenElement) {
@@ -128,7 +130,7 @@ export class VideoControl extends LitElement {
     this._resetIdleTimeout();
     const ctrl = this.shadowRoot!.querySelector('footer');
     const sidebar = this.shadowRoot!.querySelector('aside');
-    if (ctrl!.matches(':hover') || sidebar!.matches(':hover')) {
+    if (ctrl?.matches(':hover') || sidebar?.matches(':hover')) {
       this._isMouseOverControl = true;
     } else {
       this._isMouseOverControl = false;
@@ -146,13 +148,16 @@ export class VideoControl extends LitElement {
   }
 
   static styles = css`
-    :host {
+    .container {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
       display: block;
+    }
+    .container:not(.visible) {
+      cursor: none;
     }
     aside {
       position: absolute;
@@ -169,10 +174,14 @@ export class VideoControl extends LitElement {
       );
       z-index: 2;
       padding-right: 50px;
-      transition: left 1s ease;
+      transition:
+        left 1s ease,
+        opacity 0.5s ease;
+      opacity: 0;
     }
-    aside.visible {
+    .visible aside {
       left: 0;
+      opacity: 1;
     }
     footer {
       position: absolute;
@@ -186,10 +195,14 @@ export class VideoControl extends LitElement {
       grid-template-columns: 400px minmax(0, 100fr) 400px;
       align-items: center;
       gap: 20px;
-      transition: bottom 1s ease;
+      transition:
+        bottom 1s ease,
+        opacity 0.5s ease;
+      opacity: 0;
     }
-    footer.visible {
+    .visible footer {
       bottom: 0px;
+      opacity: 1;
     }
     .main-control {
       justify-content: center;
@@ -224,7 +237,7 @@ export class VideoControl extends LitElement {
       display: flex;
       gap: 5px;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
     }
     .right-control .control {
       border-radius: 10px;
@@ -251,11 +264,12 @@ export class VideoControl extends LitElement {
   `;
 
   protected render(): unknown {
-    return html`<aside
-        class="${this._isControlVisible || this._isMouseOverControl ? 'visible' : ''}"
-      >
+    const _visibleClass = this._isControlVisible || this._isMouseOverControl ? 'visible' : '';
+
+    return html`<div class="container ${_visibleClass}">
+      <aside>
         <channel-list
-          class="vertical"
+          class="vertical with-titlebar"
           activeChannelId="${this.channelId}"
           isShowBack="1"
           isVertical="1"
@@ -263,14 +277,18 @@ export class VideoControl extends LitElement {
           code="${this.code}"
         ></channel-list>
       </aside>
-      <footer class="${this._isControlVisible || this._isMouseOverControl ? 'visible' : ''}">
+      <footer>
         <div></div>
         <div class="main-control">
-          <button class="control">${unsafeHTML(ChevronsLeft)}</button>
+          <button class="control" @click=${() => dispatchEvent(ECustomEvent.prevChannel)}>
+            ${unsafeHTML(ChevronsLeft)}
+          </button>
           <button class="control center-control" @click=${this._handlePlay}>
             ${unsafeHTML(this._isPlaying ? Pause : Play)}
           </button>
-          <button class="control">${unsafeHTML(ChevronsRight)}</button>
+          <button class="control" @click=${() => dispatchEvent(ECustomEvent.nextChannel)}>
+            ${unsafeHTML(ChevronsRight)}
+          </button>
         </div>
         <div class="right-control">
           <div class="control volume">
@@ -290,6 +308,7 @@ export class VideoControl extends LitElement {
             ${unsafeHTML(this._isFullScreen ? Minimize2 : Maximize2)}
           </button>
         </div>
-      </footer>`;
+      </footer>
+    </div>`;
   }
 }

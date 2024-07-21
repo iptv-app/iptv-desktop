@@ -8,6 +8,7 @@ import { navigate } from '../utils/routing';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { ChevronLeft } from 'lucide-static';
 import { waitForElement } from '../utils/dom';
+import { ECustomEvent } from '../utils/event';
 
 @customElement('channel-list')
 export class ChannelList extends LitElement {
@@ -60,27 +61,62 @@ export class ChannelList extends LitElement {
     navigate(`home/${this.filter}/${this.code}/${channelId}`);
   };
 
-  static abortScroll = new AbortController();
+  private _abortScroll?: AbortController;
   connectedCallback(): void {
     super.connectedCallback();
+    window.addEventListener(ECustomEvent.nextChannel, () => this._handleChannelEvent('next'));
+    window.addEventListener(ECustomEvent.prevChannel, () => this._handleChannelEvent('prev'));
     if (this.activeChannelId) {
-      waitForElement(
-        this.shadowRoot!,
-        '[channelId="' + this.activeChannelId + '"]',
-        ChannelList.abortScroll.signal
-      ).then((el) => {
-        const position = el.getBoundingClientRect().top - 200;
-        this.shadowRoot?.getElementById('channel-grid')?.scrollTo({
-          top: position
-        });
-      });
+      this._scrollToChannelId(this.activeChannelId);
     }
   }
 
+  private _scrollToChannelId = (channelId: string) => {
+    if (this._abortScroll) {
+      this._abortScroll.abort();
+    }
+    this._abortScroll = new AbortController();
+    waitForElement(
+      this.shadowRoot!,
+      '[channelId="' + channelId + '"]',
+      this._abortScroll.signal
+    ).then((el) => {
+      const position = el.offsetTop - 200;
+      this.shadowRoot?.getElementById('channel-grid')?.scrollTo({
+        top: position,
+        behavior: 'smooth'
+      });
+    });
+  };
+
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    ChannelList.abortScroll.abort();
+    window.removeEventListener(ECustomEvent.nextChannel, () => this._handleChannelEvent('next'));
+    window.removeEventListener(ECustomEvent.prevChannel, () => this._handleChannelEvent('prev'));
+    this._abortScroll?.abort();
   }
+
+  private _handleChannelEvent = (type: 'prev' | 'next') => {
+    if (this.activeChannelId && this._channelList.value) {
+      const currentIdx = this._channelList.value.findIndex(
+        (item) => item.id === this.activeChannelId
+      );
+      if (type === 'prev') {
+        var newIdx = currentIdx - 1;
+        if (newIdx < 0) {
+          newIdx = this._channelList.value.length - 1;
+        }
+      } else {
+        newIdx = currentIdx + 1;
+        if (newIdx >= this._channelList.value.length) {
+          newIdx = 0;
+        }
+      }
+      const channel = this._channelList.value[newIdx];
+      this._onClickChannel(channel.id);
+      this._scrollToChannelId(channel.id);
+    }
+  };
 
   static styles = css`
     :host(.vertical) {
@@ -105,6 +141,7 @@ export class ChannelList extends LitElement {
       display: flex;
       gap: 10px;
       align-items: center;
+      user-select: none;
     }
     header .title a {
       display: inline-flex;

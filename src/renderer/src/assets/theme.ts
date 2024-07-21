@@ -9,6 +9,7 @@ export const THEME = {
   FG_COLOR: css`#FFFFFF`,
   BG_SECONDARY_COLOR: css`#171728`,
   BG_SECONDARY_HOVER_COLOR: css`#272741`,
+  BORDER_COLOR: css`#171728`,
   CHANNEL_BG_COLOR: css`#ffffff`
 };
 export const SCROLLBAR_STYLE = css`
