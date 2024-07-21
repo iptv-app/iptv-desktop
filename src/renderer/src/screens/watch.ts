@@ -57,6 +57,7 @@ export class WatchScreen extends LitElement {
       color: ${THEME.FG_COLOR};
       display: block;
       position: relative;
+      overflow: hidden;
     }
     :host #video-container {
       height: 100%;
@@ -74,8 +75,9 @@ export class WatchScreen extends LitElement {
   protected render(): unknown {
     return html`<div id="video-container">${WatchScreen._video}</div>
       <video-control
-        .channel=${this._data}
-        .backUrl="${`#home/${this.filter}/${this.code}`}"
+        channelId=${this._channelId}
+        filter=${this.filter}
+        code=${this.code}
         .video=${WatchScreen._video}
       ></video-control>`;
   }

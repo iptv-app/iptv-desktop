@@ -61,6 +61,6 @@ export class HomeScreen extends LitElement {
         code="${this.code}"
         @changeCode="${this._onChangeCode}"
       ></filter-list>
-      <channel-list type="${this.filter}" code="${this.code}"></channel-list>`;
+      <channel-list filter="${this.filter}" code="${this.code}"></channel-list>`;
   }
 }

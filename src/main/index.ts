@@ -12,6 +12,8 @@ import {
 import config from './config';
 import { FILTER_TYPE } from '../preload/iptv.type';
 
+app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport');
+
 function createWindow(path: string): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

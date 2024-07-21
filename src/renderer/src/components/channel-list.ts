@@ -5,14 +5,26 @@ import { Task } from '@lit/task';
 import './channel-item';
 import { INPUT_FOCUS_STYLE, INPUT_STYLE, THEME } from '../assets/theme';
 import { navigate } from '../utils/routing';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { ChevronLeft } from 'lucide-static';
+import { waitForElement } from '../utils/dom';
 
 @customElement('channel-list')
 export class ChannelList extends LitElement {
   @property()
-  type?: FILTER_TYPE;
+  filter?: FILTER_TYPE;
 
   @property()
   code?: string;
+
+  @property()
+  activeChannelId?: string;
+
+  @property()
+  isVertical?: boolean;
+
+  @property()
+  isShowBack?: boolean;
 
   @state()
   _search: string = '';
@@ -21,16 +33,16 @@ export class ChannelList extends LitElement {
   _searchDebounced: string = '';
 
   private _channelList = new Task(this, {
-    task: async ([type, code]) => {
+    task: async ([filter, code]) => {
       this._search = '';
       this._searchDebounced = '';
       clearTimeout(this._searchDebounceId);
-      if (!type || !code) return [];
+      if (!filter || !code) return [];
 
-      const result = await window.api.getFilteredActiveChannel(type as FILTER_TYPE, code);
+      const result = await window.api.getFilteredActiveChannel(filter as FILTER_TYPE, code);
       return result;
     },
-    args: () => [this.type, this.code]
+    args: () => [this.filter, this.code]
   });
 
   private _searchDebounceId?: NodeJS.Timeout;
@@ -45,42 +57,109 @@ export class ChannelList extends LitElement {
   };
 
   private _onClickChannel = (channelId: string) => {
-    navigate(`home/${this.type}/${this.code}/${channelId}`);
+    navigate(`home/${this.filter}/${this.code}/${channelId}`);
   };
 
+  static abortScroll = new AbortController();
+  connectedCallback(): void {
+    super.connectedCallback();
+    if (this.activeChannelId) {
+      waitForElement(
+        this.shadowRoot!,
+        '[channelId="' + this.activeChannelId + '"]',
+        ChannelList.abortScroll.signal
+      ).then((el) => {
+        const position = el.getBoundingClientRect().top - 200;
+        this.shadowRoot?.getElementById('channel-grid')?.scrollTo({
+          top: position
+        });
+      });
+    }
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    ChannelList.abortScroll.abort();
+  }
+
   static styles = css`
-    :host header {
+    :host(.vertical) {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    header {
       position: sticky;
       top: 0;
       background: ${THEME.BG_COLOR};
       box-shadow: 0 10px 20px ${THEME.BG_COLOR};
       padding: 20px;
     }
-    :host header h1 {
+    header.vertical {
+      position: static;
+      background: transparent;
+      box-shadow: none;
+    }
+    header .title {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    header .title a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ${THEME.BG_COLOR_TRANS};
+      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
+      height: 30px;
+      width: 30px;
+      border-radius: 5px;
+      color: ${THEME.PRIMARY_COLOR};
+    }
+    header .title a:focus {
+      ${INPUT_FOCUS_STYLE}
+    }
+    header h1 {
       margin: 0;
       padding: 0;
     }
-    :host header input {
+    header input {
       ${INPUT_STYLE}
       margin-top: 20px;
       max-width: 400px;
     }
-    :host header input:focus {
+    header input:focus {
       ${INPUT_FOCUS_STYLE}
     }
-    :host .channel-grid {
+    #channel-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 20px;
       padding: 20px;
     }
+    #channel-grid.vertical {
+      padding: 40px 20px;
+      overflow-y: auto;
+      grid-template-columns: 1fr;
+      gap: 5px;
+      -webkit-mask-image: linear-gradient(
+        transparent,
+        black 60px,
+        black calc(100% - 60px),
+        transparent
+      );
+    }
+    #channel-grid.vertical::-webkit-scrollbar {
+      display: none;
+    }
     @media (min-width: 768px) {
-      :host .channel-grid {
+      #channel-grid:not(.vertical) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
     @media (min-width: 1280px) {
-      :host .channel-grid {
+      #channel-grid:not(.vertical) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
@@ -88,8 +167,13 @@ export class ChannelList extends LitElement {
 
   protected render(): unknown {
     return html`
-      <header>
-        <h1>Channels</h1>
+      <header class="${this.isVertical ? 'vertical' : ''}">
+        <div class="title">
+          ${this.isShowBack
+            ? html`<a href="${`#home/${this.filter}/${this.code}`}">${unsafeHTML(ChevronLeft)}</a>`
+            : ''}
+          <h1>Channels</h1>
+        </div>
         <input
           .value="${this._search}"
           @input="${this._onChangeSearch}"
@@ -97,7 +181,7 @@ export class ChannelList extends LitElement {
           placeholder="Search Channel..."
         />
       </header>
-      <div class="channel-grid">
+      <div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
         ${this._channelList.render({
           complete: (channels) =>
             channels
@@ -110,9 +194,13 @@ export class ChannelList extends LitElement {
               )
               .map((channel) => {
                 return html`<channel-item
+                  channelId="${channel.id}"
+                  class="${this.isVertical ? 'vertical' : ''} ${this.activeChannelId === channel.id
+                    ? 'active'
+                    : ''}"
                   @click="${() => this._onClickChannel(channel.id)}"
-                  logo="${channel.logo}"
-                  name="${channel.alt_names[0] ?? channel.name}"
+                  .logo="${channel.logo}"
+                  .name="${channel.alt_names[0] ?? channel.name}"
                 ></channel-item>`;
               })
         })}

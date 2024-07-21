@@ -1,25 +1,30 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { INPUT_FOCUS_STYLE, THEME } from '../assets/theme';
-import { IPTVChannelWithStream } from '../../../preload/iptv.type';
 import {
-  ArrowLeft,
   ChevronsLeft,
   ChevronsRight,
   Maximize2,
   Minimize2,
   Pause,
-  Play
+  Play,
+  Volume2,
+  VolumeX
 } from 'lucide-static';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { FILTER_TYPE } from '../../../preload/iptv.type';
+import './channel-list';
 
 @customElement('video-control')
 export class VideoControl extends LitElement {
-  @property({ attribute: false })
-  channel?: IPTVChannelWithStream;
+  @property()
+  filter?: FILTER_TYPE;
 
   @property()
-  backUrl?: string;
+  code?: string;
+
+  @property()
+  channelId?: string;
 
   private _video?: HTMLMediaElement;
   @property()
@@ -32,11 +37,24 @@ export class VideoControl extends LitElement {
   get video() {
     return this._video;
   }
+
+  @state()
+  _isMouseOverControl = false;
+
+  @state()
+  _isControlVisible = true;
+
   @state()
   _isPlaying = false;
 
   @state()
   _isFullScreen = false;
+
+  @state()
+  _volume = 1;
+
+  @state()
+  _isMuted = false;
 
   constructor() {
     super();
@@ -44,9 +62,22 @@ export class VideoControl extends LitElement {
   }
 
   private _listenVideo = (vid: HTMLMediaElement) => {
+    if (localStorage.getItem('volume')) {
+      vid.volume = Number(localStorage.getItem('volume'));
+    }
+    if (localStorage.getItem('isMuted')) {
+      vid.muted = localStorage.getItem('isMuted') === '1' ? true : false;
+    }
     vid.onplay = () => (this._isPlaying = true);
     vid.onpause = () => (this._isPlaying = false);
     vid.onended = () => (this._isPlaying = false);
+
+    vid.onvolumechange = () => {
+      this._volume = vid.volume;
+      this._isMuted = vid.muted;
+    };
+    this._volume = vid.volume;
+    this._isMuted = vid.muted;
   };
 
   private _handlePlay = () => {
@@ -55,6 +86,17 @@ export class VideoControl extends LitElement {
     } else {
       this.video?.play();
     }
+  };
+
+  private _handleChangeVolume = (e) => {
+    this._video!.volume = Number(e.target.value);
+    localStorage.setItem('volume', e.target.value);
+  };
+
+  private _toggleMuted = () => {
+    let newVal = !this._isMuted;
+    this._video!.muted = newVal;
+    localStorage.setItem('isMuted', newVal ? '1' : '0');
   };
 
   private _updateFullScreenState = () => {
@@ -69,63 +111,85 @@ export class VideoControl extends LitElement {
     this._updateFullScreenState();
   };
 
+  private _idleTimeout?: NodeJS.Timeout;
+  private _resetIdleTimeout = () => {
+    if (!this._isControlVisible) {
+      this._isControlVisible = true;
+    }
+    if (this._idleTimeout) {
+      clearTimeout(this._idleTimeout);
+    }
+    this._idleTimeout = setTimeout(() => {
+      this._isControlVisible = false;
+    }, 3000);
+  };
+
+  private _detectControlAndIdle = () => {
+    this._resetIdleTimeout();
+    const ctrl = this.shadowRoot!.querySelector('footer');
+    const sidebar = this.shadowRoot!.querySelector('aside');
+    if (ctrl!.matches(':hover') || sidebar!.matches(':hover')) {
+      this._isMouseOverControl = true;
+    } else {
+      this._isMouseOverControl = false;
+    }
+  };
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.onmousemove = this._detectControlAndIdle;
+    this.onmousedown = this._detectControlAndIdle;
+    this.ontouchstart = this._detectControlAndIdle;
+    this.onclick = this._detectControlAndIdle;
+    this.onkeydown = this._detectControlAndIdle;
+    this._detectControlAndIdle();
+  }
+
   static styles = css`
-    :host header {
+    :host {
       position: absolute;
-      top: 20px;
-      left: 20px;
-    }
-    :host .back-btn {
-      background-color: ${THEME.BG_COLOR_TRANS};
-      display: inline-flex;
-      align-items: center;
-      border-radius: 10px;
-      color: ${THEME.PRIMARY_COLOR};
-      padding: 5px 10px;
-      text-decoration: none;
-      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
-    }
-    :host .back-btn:focus {
-      ${INPUT_FOCUS_STYLE}
-    }
-    :host footer {
-      display: grid;
-      grid-template-columns: 500px minmax(0, 100fr) 500px;
-      align-items: center;
-      gap: 20px;
-      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
       bottom: 0;
+      display: block;
+    }
+    aside {
+      position: absolute;
+      top: 0;
+      left: -450px;
+      bottom: 0;
+      overflow-y: auto;
+      width: 400px;
+      background: linear-gradient(
+        to right,
+        ${THEME.BG_COLOR_TRANS_STRONG},
+        ${THEME.BG_COLOR_TRANS},
+        transparent
+      );
+      z-index: 2;
+      padding-right: 50px;
+      transition: left 1s ease;
+    }
+    aside.visible {
+      left: 0;
+    }
+    footer {
+      position: absolute;
+      bottom: -200px;
       left: 0;
       right: 0;
       background: linear-gradient(to top, ${THEME.BG_COLOR_TRANS}, transparent);
       padding: 80px 40px 40px 40px;
       box-sizing: border-box;
-    }
-    :host figure {
-      width: 150px;
-      height: 50px;
-      margin: 0;
-      background-color: ${THEME.CHANNEL_BG_COLOR};
-      padding: 20px;
-      border-radius: 10px;
-    }
-    :host figure img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    :host h1 {
-      margin: 0;
-    }
-    .channel {
-      display: flex;
+      display: grid;
+      grid-template-columns: 400px minmax(0, 100fr) 400px;
       align-items: center;
       gap: 20px;
+      transition: bottom 1s ease;
     }
-    .channel-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+    footer.visible {
+      bottom: 0px;
     }
     .main-control {
       justify-content: center;
@@ -133,7 +197,7 @@ export class VideoControl extends LitElement {
       align-items: center;
       gap: 10px;
     }
-    button {
+    .control {
       background-color: ${THEME.BG_COLOR_TRANS};
       border: 2px solid ${THEME.BG_SECONDARY_COLOR};
       color: ${THEME.PRIMARY_COLOR};
@@ -141,52 +205,88 @@ export class VideoControl extends LitElement {
       height: 50px;
       width: 50px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
     }
-    button.center-control {
+    .control.center-control {
       height: 70px;
       width: 70px;
     }
-    button.center-control svg {
+    .control.center-control svg {
       height: 50px;
     }
-    button:focus {
+    .control:focus {
       ${INPUT_FOCUS_STYLE}
     }
     .right-control {
-      text-align: right;
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
     }
-    .right-control button {
+    .right-control .control {
       border-radius: 10px;
+    }
+    .control.volume {
+      width: auto;
+      padding-left: 10px;
+      padding-right: 10px;
+      cursor: default;
+      display: flex;
+      gap: 5px;
+    }
+    .control.volume button {
+      background-color: transparent;
+      color: ${THEME.PRIMARY_COLOR};
+      padding: 0;
+      cursor: pointer;
+      border: none;
+    }
+    .control.volume input {
+      width: 100px;
+      accent-color: ${THEME.PRIMARY_COLOR};
     }
   `;
 
   protected render(): unknown {
-    return html` <header>
-        <a class="back-btn" href="${this.backUrl}"> ${unsafeHTML(ArrowLeft)} Back </a>
-      </header>
-      <footer>
-        <div class="channel">
-          <figure>
-            <img
-              onerror="this.src='/assets/logo-placeholder.png'"
-              src="${this.channel?.logo}"
-              alt=""
-            />
-          </figure>
-          <div class="channel-meta">
-            <h1>${this.channel?.alt_names[0] ?? this.channel?.name}</h1>
-            <div>${this.channel?.owners.join(', ')}</div>
-          </div>
-        </div>
+    return html`<aside
+        class="${this._isControlVisible || this._isMouseOverControl ? 'visible' : ''}"
+      >
+        <channel-list
+          class="vertical"
+          activeChannelId="${this.channelId}"
+          isShowBack="1"
+          isVertical="1"
+          filter="${this.filter}"
+          code="${this.code}"
+        ></channel-list>
+      </aside>
+      <footer class="${this._isControlVisible || this._isMouseOverControl ? 'visible' : ''}">
+        <div></div>
         <div class="main-control">
-          <button>${unsafeHTML(ChevronsLeft)}</button>
-          <button class="center-control" @click=${this._handlePlay}>
+          <button class="control">${unsafeHTML(ChevronsLeft)}</button>
+          <button class="control center-control" @click=${this._handlePlay}>
             ${unsafeHTML(this._isPlaying ? Pause : Play)}
           </button>
-          <button>${unsafeHTML(ChevronsRight)}</button>
+          <button class="control">${unsafeHTML(ChevronsRight)}</button>
         </div>
         <div class="right-control">
-          <button @click=${this._toggleFullScreen}>
+          <div class="control volume">
+            <button @click=${this._toggleMuted}>
+              ${unsafeHTML(this._isMuted ? VolumeX : Volume2)}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              @input=${this._handleChangeVolume}
+              .value=${this._volume}
+            />
+          </div>
+          <button class="control" @click=${this._toggleFullScreen}>
             ${unsafeHTML(this._isFullScreen ? Minimize2 : Maximize2)}
           </button>
         </div>

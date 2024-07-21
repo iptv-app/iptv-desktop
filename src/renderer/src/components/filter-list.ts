@@ -5,6 +5,7 @@ import './filter-item';
 import { INPUT_FOCUS_STYLE, INPUT_STYLE, THEME } from '../assets/theme';
 import './filter-select';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
+import { waitForElement } from '../utils/dom';
 
 type ListItem = {
   code: string;
@@ -17,6 +18,7 @@ export class FilterList extends LitElement {
   @property()
   filter?: FILTER_TYPE;
 
+  _code?: string;
   @property()
   code?: string;
 
@@ -84,6 +86,26 @@ export class FilterList extends LitElement {
     args: () => [this.filter]
   });
 
+  static abortScroll = new AbortController();
+  connectedCallback(): void {
+    super.connectedCallback();
+    if (this.code) {
+      waitForElement(this.shadowRoot!, '#item-' + this.code, FilterList.abortScroll.signal).then(
+        (el) => {
+          const position = el.getBoundingClientRect().top - 200;
+          this.scrollTo({
+            top: position
+          });
+        }
+      );
+    }
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    FilterList.abortScroll.abort();
+  }
+
   static styles = css`
     :host {
       margin: 0;
@@ -139,6 +161,7 @@ export class FilterList extends LitElement {
               )
               .map((item) => {
                 return html`<filter-item
+                  id="item-${item.code}"
                   @click="${() => this._onChangeCode(item.code)}"
                   class="${this.code === item.code ? 'active' : ''}"
                   label="${item.label}"

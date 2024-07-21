@@ -4,6 +4,7 @@ export const THEME = {
   PRIMARY_COLOR: css`#c082ff`,
   PRIMARY_FG_COLOR: css`#0a0a12`,
   BG_COLOR: css`#0a0a12`,
+  BG_COLOR_TRANS_STRONG: css`#0a0a12ee`,
   BG_COLOR_TRANS: css`#0a0a12dd`,
   FG_COLOR: css`#FFFFFF`,
   BG_SECONDARY_COLOR: css`#171728`,
@@ -29,7 +30,7 @@ export const SCROLLBAR_STYLE = css`
 export const INPUT_STYLE = css`
   width: 100%;
   box-sizing: border-box;
-  background-color: transparent;
+  background-color: ${THEME.BG_COLOR_TRANS};
   border: 2px solid ${THEME.BG_SECONDARY_COLOR};
   border-radius: 5px;
   padding: 10px;

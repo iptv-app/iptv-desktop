@@ -17,6 +17,9 @@ export class ChannelItem extends LitElement {
   }
 
   @property()
+  isVertical?: boolean;
+
+  @property()
   logo?: string;
 
   @property()
@@ -33,8 +36,21 @@ export class ChannelItem extends LitElement {
       gap: 15px;
       user-select: none;
     }
+    :host(.vertical) {
+      flex-direction: row;
+      align-items: center;
+      background-color: transparent;
+    }
+    :host(.active) {
+      background-color: ${THEME.PRIMARY_COLOR} !important;
+      color: ${THEME.PRIMARY_FG_COLOR} !important;
+    }
     :host(:hover) {
       background-color: ${THEME.BG_SECONDARY_HOVER_COLOR};
+    }
+
+    :host(.vertical:hover) {
+      background-color: ${THEME.BG_COLOR_TRANS};
     }
     :host(:focus) {
       outline: 2px solid ${THEME.PRIMARY_COLOR};
@@ -51,6 +67,11 @@ export class ChannelItem extends LitElement {
       width: 100%;
       box-sizing: border-box;
     }
+    :host(.vertical) .logo {
+      width: 120px;
+      height: 60px;
+      padding: 6px;
+    }
     :host .logo img {
       object-fit: contain;
       width: 100%;
@@ -60,6 +81,10 @@ export class ChannelItem extends LitElement {
     :host h3 {
       margin: 0;
       text-align: center;
+    }
+    :host(.vertical) h3 {
+      text-align: left;
+      flex: 1;
     }
   `;
 
