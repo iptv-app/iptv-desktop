@@ -3,12 +3,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import { Task } from '@lit/task';
 import './channel-item';
-import { INPUT_FOCUS_STYLE, INPUT_STYLE, THEME } from '../assets/theme';
+import { THEME } from '../assets/theme';
 import { navigate } from '../utils/routing';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { ChevronLeft } from 'lucide-static';
 import { waitForElement } from '../utils/dom';
 import { ECustomEvent } from '../utils/event';
+import './layout/page-title';
+import './form/search-input';
 
 @customElement('channel-list')
 export class ChannelList extends LitElement {
@@ -37,7 +37,6 @@ export class ChannelList extends LitElement {
     task: async ([filter, code]) => {
       this._search = '';
       this._searchDebounced = '';
-      clearTimeout(this._searchDebounceId);
       if (!filter || !code) return [];
 
       const result = await window.api.getFilteredActiveChannel(filter as FILTER_TYPE, code);
@@ -46,15 +45,15 @@ export class ChannelList extends LitElement {
     args: () => [this.filter, this.code]
   });
 
-  private _searchDebounceId?: NodeJS.Timeout;
-  private _onChangeSearch = (e) => {
-    const val = e.target.value;
+  private _onChangeSearch = (e: CustomEvent) => {
+    const val = e.detail;
     this._search = val;
-    clearTimeout(this._searchDebounceId);
-
-    this._searchDebounceId = setTimeout(() => {
+  };
+  private _onChangeSearchDebounced = (e: CustomEvent) => {
+    const val = e.detail;
+    if (val !== this._searchDebounced) {
       this._searchDebounced = val;
-    }, 300);
+    }
   };
 
   private _onClickChannel = (channelId: string) => {
@@ -125,6 +124,14 @@ export class ChannelList extends LitElement {
       height: 100%;
       overflow: hidden;
     }
+    .top-container {
+      display: flex;
+      gap: 5px;
+      justify-items: space-between;
+    }
+    .left-component {
+      flex: 1;
+    }
     header {
       position: sticky;
       top: 0;
@@ -137,37 +144,9 @@ export class ChannelList extends LitElement {
       background: transparent;
       box-shadow: none;
     }
-    header .title {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      user-select: none;
-    }
-    header .title a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: ${THEME.BG_COLOR_TRANS};
-      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
-      height: 30px;
-      width: 30px;
-      border-radius: 5px;
-      color: ${THEME.PRIMARY_COLOR};
-    }
-    header .title a:focus {
-      ${INPUT_FOCUS_STYLE}
-    }
-    header h1 {
-      margin: 0;
-      padding: 0;
-    }
-    header input {
-      ${INPUT_STYLE}
+    search-input {
       margin-top: 20px;
       max-width: 400px;
-    }
-    header input:focus {
-      ${INPUT_FOCUS_STYLE}
     }
     #channel-grid {
       display: grid;
@@ -205,18 +184,21 @@ export class ChannelList extends LitElement {
   protected render(): unknown {
     return html`
       <header class="${this.isVertical ? 'vertical' : ''}">
-        <div class="title">
-          ${this.isShowBack
-            ? html`<a href="${`#home/${this.filter}/${this.code}`}">${unsafeHTML(ChevronLeft)}</a>`
-            : ''}
-          <h1>Channels</h1>
+        <div class="top-container">
+          <div class="left-component">
+            <page-title
+              text="Channels"
+              backHref=${this.isShowBack ? `#home/${this.filter}/${this.code}` : undefined}
+            ></page-title>
+            <search-input
+              value="${this._search}"
+              @change=${this._onChangeSearch}
+              @changeDebounced=${this._onChangeSearchDebounced}
+              placeholder="Search Channel..."
+            />
+          </div>
+          <slot name="right-component" />
         </div>
-        <input
-          .value="${this._search}"
-          @input="${this._onChangeSearch}"
-          type="text"
-          placeholder="Search Channel..."
-        />
       </header>
       <div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
         ${this._channelList.render({

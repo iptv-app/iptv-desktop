@@ -2,10 +2,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Task } from '@lit/task';
 import './filter-item';
-import { INPUT_FOCUS_STYLE, INPUT_STYLE, THEME } from '../assets/theme';
+import { THEME } from '../assets/theme';
 import './filter-select';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import { waitForElement } from '../utils/dom';
+import './form/search-input';
 
 type ListItem = {
   code: string;
@@ -44,21 +45,20 @@ export class FilterList extends LitElement {
     this.dispatchEvent(newEvent);
     this._search = '';
     this._searchDebounced = '';
-    clearTimeout(this._searchDebounceId);
     this.scrollTo({
       top: 0
     });
   };
 
-  private _searchDebounceId?: NodeJS.Timeout;
-  private _onChangeSearch = (e) => {
-    const val = e.target.value;
+  private _onChangeSearch = (e: CustomEvent) => {
+    const val = e.detail;
     this._search = val;
-    clearTimeout(this._searchDebounceId);
-
-    this._searchDebounceId = setTimeout(() => {
+  };
+  private _onChangeSearchDebounced = (e: CustomEvent) => {
+    const val = e.detail;
+    if (val !== this._searchDebounced) {
       this._searchDebounced = val;
-    }, 300);
+    }
   };
 
   private _filterContents = new Task(this, {
@@ -126,12 +126,6 @@ export class FilterList extends LitElement {
     :host header filter-select {
       padding: 20px 0;
     }
-    :host header input {
-      ${INPUT_STYLE}
-    }
-    :host header input:focus {
-      ${INPUT_FOCUS_STYLE}
-    }
     :host .items {
       padding: 10px;
     }
@@ -144,11 +138,11 @@ export class FilterList extends LitElement {
           @changeValue="${this._onChangeFilter}"
           value="${this.filter}"
         ></filter-select>
-        <input
-          .value="${this._search}"
-          @input="${this._onChangeSearch}"
-          type="text"
-          placeholder="Search here..."
+        <search-input
+          value="${this._search}"
+          @change=${this._onChangeSearch}
+          @changeDebounced=${this._onChangeSearchDebounced}
+          placeholder="Search Channel..."
         />
       </header>
       <div class="items">

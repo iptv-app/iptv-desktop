@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { THEME } from '../assets/theme';
+import LogoPlaceholder from '../assets/logo-placeholder.png?url';
 
 @customElement('channel-item')
 export class ChannelItem extends LitElement {
@@ -91,7 +92,7 @@ export class ChannelItem extends LitElement {
   protected render(): unknown {
     return html`
       <div class="logo">
-        <img onerror="this.src='/assets/logo-placeholder.png'" src="${this.logo}" alt="" />
+        <img onerror="this.src='${LogoPlaceholder}'" src="${this.logo}" alt="" />
       </div>
       <h3>${this.name}</h3>
     `;

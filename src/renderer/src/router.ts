@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { THEME } from './assets/theme';
 import './screens/home';
 import './screens/watch';
+import './screens/setting';
 
 interface RouteItem {
   view: (params: RegExpExecArray) => unknown;
@@ -21,6 +22,10 @@ const ROUTES: Array<RouteItem & { regex: RegExp }> = [
   {
     regex: /^home\/?(country|category|language)?\/?(.*?)?$/,
     view: (params) => html`<home-screen filter="${params[1]}" code="${params[2]}"></home-screen>`
+  },
+  {
+    regex: /^setting$/,
+    view: () => html`<setting-screen></setting>`
   }
 ];
 

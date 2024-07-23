@@ -5,6 +5,10 @@ import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import '../components/channel-list';
 import { navigate } from '../utils/routing';
+import '../components/video-player/control-button';
+import '../components/video-player/fullscreen-button';
+import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
+import { Settings } from 'lucide-static';
 
 @customElement('home-screen')
 export class HomeScreen extends LitElement {
@@ -41,16 +45,22 @@ export class HomeScreen extends LitElement {
         background-color: ${THEME.BG_COLOR};
         color: ${THEME.FG_COLOR};
       }
-      :host filter-list {
+      filter-list {
         width: 300px;
         height: 100vh;
         overflow-y: scroll;
         border-right: 1px solid ${THEME.BG_SECONDARY_COLOR};
       }
-      :host channel-list {
+      channel-list {
         flex: 1;
         height: 100vh;
         overflow-y: scroll;
+      }
+      .right-buttons {
+        display: flex;
+        align-items: flex-start;
+        min-width: 0;
+        gap: 5px;
       }
     `
   ];
@@ -61,6 +71,13 @@ export class HomeScreen extends LitElement {
         code="${this.code}"
         @changeCode="${this._onChangeCode}"
       ></filter-list>
-      <channel-list filter="${this.filter}" code="${this.code}"></channel-list>`;
+      <channel-list filter="${this.filter}" code="${this.code}">
+        <div class="right-buttons" slot="right-component">
+          <control-button @click=${() => navigate('setting')}
+            >${unsafeHTML(Settings)}</control-button
+          >
+          <fullscreen-button></fullscreen-button>
+        </div>
+      </channel-list>`;
   }
 }

@@ -1,20 +1,14 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { INPUT_FOCUS_STYLE, THEME } from '../assets/theme';
-import {
-  ChevronsLeft,
-  ChevronsRight,
-  Maximize2,
-  Minimize2,
-  Pause,
-  Play,
-  Volume2,
-  VolumeX
-} from 'lucide-static';
+import { THEME } from '../../assets/theme';
+import { ChevronsLeft, ChevronsRight, Pause, Play } from 'lucide-static';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { FILTER_TYPE } from '../../../preload/iptv.type';
-import './channel-list';
-import { dispatchEvent, ECustomEvent } from '../utils/event';
+import { FILTER_TYPE } from '../../../../preload/iptv.type';
+import '../channel-list';
+import { dispatchEvent, ECustomEvent } from '../../utils/event';
+import './control-button';
+import './volume-control';
+import './fullscreen-button';
 
 @customElement('video-control')
 export class VideoControl extends LitElement {
@@ -49,18 +43,10 @@ export class VideoControl extends LitElement {
   _isPlaying = false;
 
   @state()
-  _isFullScreen = false;
-
-  @state()
   _volume = 1;
 
   @state()
   _isMuted = false;
-
-  constructor() {
-    super();
-    this._updateFullScreenState();
-  }
 
   private _listenVideo = (vid: HTMLMediaElement) => {
     if (localStorage.getItem('volume')) {
@@ -89,28 +75,15 @@ export class VideoControl extends LitElement {
     }
   };
 
-  private _handleChangeVolume = (e) => {
-    this._video!.volume = Number(e.target.value);
-    localStorage.setItem('volume', e.target.value);
+  private _handleChangeVolume = (e: CustomEvent) => {
+    this._video!.volume = e.detail.volume;
+    localStorage.setItem('volume', e.detail.volume);
   };
 
   private _toggleMuted = () => {
     let newVal = !this._isMuted;
     this._video!.muted = newVal;
     localStorage.setItem('isMuted', newVal ? '1' : '0');
-  };
-
-  private _updateFullScreenState = () => {
-    const isFullScreen = document.fullscreenElement !== null;
-    this._isFullScreen = isFullScreen;
-  };
-  private _toggleFullScreen = async () => {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
-    }
-    this._updateFullScreenState();
   };
 
   private _idleTimeout?: NodeJS.Timeout;
@@ -210,56 +183,11 @@ export class VideoControl extends LitElement {
       align-items: center;
       gap: 10px;
     }
-    .control {
-      background-color: ${THEME.BG_COLOR_TRANS};
-      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
-      color: ${THEME.PRIMARY_COLOR};
-      border-radius: 50%;
-      height: 50px;
-      width: 50px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-    .control.center-control {
-      height: 70px;
-      width: 70px;
-    }
-    .control.center-control svg {
-      height: 50px;
-    }
-    .control:focus {
-      ${INPUT_FOCUS_STYLE}
-    }
     .right-control {
       display: flex;
       gap: 5px;
       align-items: center;
       justify-content: flex-end;
-    }
-    .right-control .control {
-      border-radius: 10px;
-    }
-    .control.volume {
-      width: auto;
-      padding-left: 10px;
-      padding-right: 10px;
-      cursor: default;
-      display: flex;
-      gap: 5px;
-    }
-    .control.volume button {
-      background-color: transparent;
-      color: ${THEME.PRIMARY_COLOR};
-      padding: 0;
-      cursor: pointer;
-      border: none;
-    }
-    .control.volume input {
-      width: 100px;
-      accent-color: ${THEME.PRIMARY_COLOR};
     }
   `;
 
@@ -280,33 +208,24 @@ export class VideoControl extends LitElement {
       <footer>
         <div></div>
         <div class="main-control">
-          <button class="control" @click=${() => dispatchEvent(ECustomEvent.prevChannel)}>
+          <control-button class="circle" @click=${() => dispatchEvent(ECustomEvent.prevChannel)}>
             ${unsafeHTML(ChevronsLeft)}
-          </button>
-          <button class="control center-control" @click=${this._handlePlay}>
+          </control-button>
+          <control-button class="circle lg" @click=${this._handlePlay}>
             ${unsafeHTML(this._isPlaying ? Pause : Play)}
-          </button>
-          <button class="control" @click=${() => dispatchEvent(ECustomEvent.nextChannel)}>
+          </control-button>
+          <control-button class="circle" @click=${() => dispatchEvent(ECustomEvent.nextChannel)}>
             ${unsafeHTML(ChevronsRight)}
-          </button>
+          </control-button>
         </div>
         <div class="right-control">
-          <div class="control volume">
-            <button @click=${this._toggleMuted}>
-              ${unsafeHTML(this._isMuted ? VolumeX : Volume2)}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              @input=${this._handleChangeVolume}
-              .value=${this._volume}
-            />
-          </div>
-          <button class="control" @click=${this._toggleFullScreen}>
-            ${unsafeHTML(this._isFullScreen ? Minimize2 : Maximize2)}
-          </button>
+          <volume-control
+            @volumeChange=${this._handleChangeVolume}
+            @toggleMuted=${this._toggleMuted}
+            volume=${this._volume}
+            ?isMuted=${this._isMuted}
+          ></volume-control>
+          <fullscreen-button></fullscreen-button>
         </div>
       </footer>
     </div>`;
