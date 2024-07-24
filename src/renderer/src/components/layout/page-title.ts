@@ -13,24 +13,29 @@ export class PageTitle extends LitElement {
   backHref?: string;
 
   static styles = css`
-    .host {
+    :host {
       display: flex;
       gap: 10px;
       align-items: center;
     }
     .left {
       flex: 1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
     a {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background-color: ${THEME.BG_COLOR_TRANS};
-      border: 2px solid ${THEME.BG_SECONDARY_COLOR};
       height: 30px;
       width: 30px;
       border-radius: 5px;
       color: ${THEME.PRIMARY_COLOR};
+      -webkit-user-drag: none;
+    }
+    a svg {
+      height: 28px;
     }
     a:focus {
       ${INPUT_FOCUS_STYLE}

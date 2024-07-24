@@ -1,18 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, nativeTheme } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import {
-  getAllCategory,
-  getAllCountry,
-  getAllLanguage,
-  getFilteredActiveChannel,
-  getSingleChannelWithStream
-} from './iptv';
 import config from './config';
-import { FILTER_TYPE } from '../preload/iptv.type';
+import { registerCoreIPC, registerWindowIPC } from './ipc';
+import { bypassCORS, setupDOH } from './network';
 
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport');
+nativeTheme.themeSource = 'dark';
 
 function createWindow(path: string): void {
   // Create the browser window.
@@ -28,31 +23,8 @@ function createWindow(path: string): void {
     }
   });
 
-  // CORS
-  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    const responseHeaders: { [key: string]: string | string[] } = {};
-
-    for (const key in details.responseHeaders) {
-      if (
-        key.toLowerCase() !== 'access-control-allow-origin' &&
-        key.toLowerCase() !== 'access-control-allow-headers'
-      ) {
-        responseHeaders[key] = details.responseHeaders[key];
-      }
-    }
-
-    responseHeaders['Access-Control-Allow-Origin'] = ['*'];
-    responseHeaders['Access-Control-Allow-Headers'] = ['*'];
-
-    var statusLine: string | undefined = undefined;
-    if (details.method === 'OPTIONS') {
-      statusLine = 'HTTP/1.1 200 OK';
-    }
-    callback({
-      responseHeaders,
-      statusLine
-    });
-  });
+  registerWindowIPC(mainWindow);
+  bypassCORS(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
@@ -86,26 +58,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  app.configureHostResolver({
-    secureDnsMode: 'secure',
-    secureDnsServers: ['https://chrome.cloudflare-dns.com/dns-query']
-  });
-
-  // IPC test
-  ipcMain.handle('getAllCountry', getAllCountry);
-  ipcMain.handle('getAllCategory', getAllCategory);
-  ipcMain.handle('getAllLanguage', getAllLanguage);
-  ipcMain.handle('getFilteredActiveChannel', (_e, type, code) =>
-    getFilteredActiveChannel(type, code)
-  );
-  ipcMain.handle('getSingleChannelWithStream', (_e, channel) =>
-    getSingleChannelWithStream(channel)
-  );
-  ipcMain.handle('setIptvView', (_e, type: FILTER_TYPE, code: string) => {
-    config.data.iptvView.filter = type;
-    config.data.iptvView.code = code;
-    config.write();
-  });
+  setupDOH(app, config.data.app);
+  registerCoreIPC();
 
   const iptvView = config.data.iptvView;
   var hash = '#home/' + iptvView.filter;

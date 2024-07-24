@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Task } from '@lit/task';
-import './filter-item';
+import './layout/list-item';
 import { THEME } from '../assets/theme';
 import './filter-select';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
@@ -142,7 +142,7 @@ export class FilterList extends LitElement {
           value="${this._search}"
           @change=${this._onChangeSearch}
           @changeDebounced=${this._onChangeSearchDebounced}
-          placeholder="Search Channel..."
+          placeholder="Search ${this.filter}..."
         />
       </header>
       <div class="items">
@@ -157,13 +157,13 @@ export class FilterList extends LitElement {
                     .includes(this._searchDebounced.toLowerCase())
               )
               .map((item) => {
-                return html`<filter-item
+                return html`<list-item
                   id="item-${item.code}"
                   @click="${() => this._onChangeCode(item.code)}"
                   class="${this.code === item.code ? 'active' : ''}"
                   label="${item.label}"
                   icon="${item.icon}"
-                ></filter-item>`;
+                ></list-item>`;
               })
         })}
       </div>

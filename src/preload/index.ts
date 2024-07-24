@@ -9,7 +9,11 @@ const api: API = {
     ipcRenderer.invoke('getFilteredActiveChannel', type, code),
   getSingleChannelWithStream: (channelId) =>
     ipcRenderer.invoke('getSingleChannelWithStream', channelId),
-  setIptvView: (filter, code) => ipcRenderer.invoke('setIptvView', filter, code)
+  setIptvView: (filter, code) => ipcRenderer.invoke('setIptvView', filter, code),
+  getIptvView: () => ipcRenderer.invoke('getIptvView'),
+  clearAllCache: () => ipcRenderer.invoke('clearAllCache'),
+  getAppConfig: () => ipcRenderer.invoke('getAppConfig'),
+  setAppConfig: (newCfg) => ipcRenderer.invoke('setAppConfig', newCfg)
 };
 
 if (process.contextIsolated) {

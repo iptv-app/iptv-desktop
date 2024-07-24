@@ -27,6 +27,7 @@
     "@lit/task": "^1.0.1",
     "hls.js": "^1.5.13",
     "lit": "^3.1.4",
+    "lodash": "^4.17.21",
     "lowdb": "^7.0.1",
     "lucide-static": "^0.411.0"
   },
@@ -34,6 +35,7 @@
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/lodash": "^4.17.7",
     "@types/node": "^20.14.8",
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3",

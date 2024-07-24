@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { THEME } from './assets/theme';
+import { SCROLLBAR_STYLE, THEME } from './assets/theme';
 import './screens/home';
 import './screens/watch';
 import './screens/setting';
@@ -25,7 +25,7 @@ const ROUTES: Array<RouteItem & { regex: RegExp }> = [
   },
   {
     regex: /^setting$/,
-    view: () => html`<setting-screen></setting>`
+    view: () => html`<setting-screen></setting-screen>`
   }
 ];
 
@@ -59,12 +59,17 @@ export class AppRouter extends LitElement {
     }
   };
 
-  static styles = css`
-    :host {
-      background-color: ${THEME.BG_COLOR};
-      color: ${THEME.FG_COLOR};
-    }
-  `;
+  static styles = [
+    SCROLLBAR_STYLE,
+    css`
+      :host {
+        background-color: ${THEME.BG_COLOR};
+        color: ${THEME.FG_COLOR};
+        display: block;
+        height: 100vh;
+      }
+    `
+  ];
 
   protected render(): unknown {
     if (this.view !== undefined) return this.view;

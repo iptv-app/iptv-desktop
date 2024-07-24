@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: app.iptv.desktop
 productName: iptv-desktop
 directories:
   buildResources: build

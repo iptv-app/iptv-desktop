@@ -2,8 +2,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { INPUT_FOCUS_STYLE, THEME } from '../../assets/theme';
 
-@customElement('control-button')
-export class ControlButton extends LitElement {
+@customElement('app-button')
+export class AppButton extends LitElement {
   tabIndex = 1;
   static styles = css`
     :host {
@@ -12,12 +12,24 @@ export class ControlButton extends LitElement {
       color: ${THEME.PRIMARY_COLOR};
       border-radius: 10px;
       height: 50px;
-      width: 50px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
+      padding-left: 20px;
+      padding-right: 20px;
+      user-select: none;
+    }
+    :host(.primary) {
+      background-color: ${THEME.PRIMARY_COLOR};
+      color: ${THEME.PRIMARY_FG_COLOR};
+      border: none;
+    }
+    :host(.icon) {
+      width: 50px;
+      padding-left: 0px;
+      padding-right: 0px;
     }
     :host(.lg) {
       height: 70px;

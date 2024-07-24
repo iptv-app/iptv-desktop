@@ -1,15 +1,18 @@
 import { customElement, property } from 'lit/decorators.js';
-import { ControlButton } from './control-button';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { Volume2, VolumeX } from 'lucide-static';
 import { css, html } from 'lit';
 import { THEME } from '../../assets/theme';
+import { AppButton } from '../form/app-button';
+
 @customElement('volume-control')
-export class VolumeControl extends ControlButton {
+export class VolumeControl extends AppButton {
   @property()
   volume?: number;
 
-  @property()
+  @property({
+    type: Boolean
+  })
   isMuted?: boolean;
 
   private _handleChangeVolume = (e) => {

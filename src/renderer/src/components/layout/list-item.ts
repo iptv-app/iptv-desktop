@@ -1,9 +1,9 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { THEME } from '../assets/theme';
+import { THEME } from '../../assets/theme';
 
-@customElement('filter-item')
-export class FilterItem extends LitElement {
+@customElement('list-item')
+export class ListItem extends LitElement {
   tabIndex = 0;
 
   constructor() {
@@ -26,17 +26,24 @@ export class FilterItem extends LitElement {
     :host {
       user-select: none;
       display: flex;
-      gap: 5px;
+      gap: 10px;
       background-color: ${THEME.BG_SECONDARY_COLOR};
       margin: 10px 0;
       padding: 10px;
       border-radius: 8px;
       cursor: pointer;
+      align-items: center;
     }
     :host .label {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    :host(.lg) .label {
+      font-size: 1.2rem;
+    }
+    :host(.bold) .label {
+      font-weight: bold;
     }
     :host(:hover) {
       background-color: ${THEME.BG_SECONDARY_HOVER_COLOR};
@@ -53,7 +60,7 @@ export class FilterItem extends LitElement {
   `;
 
   protected render(): unknown {
-    return html`${this.icon ? html`<span>${this.icon}</span>` : ``}
+    return html`${this.icon ? html`<span>${this.icon}</span>` : html`<slot name="icon" />`}
       <span class="label" title="${this.label}">${this.label}</span> `;
   }
 }

@@ -1,3 +1,4 @@
+import { AppConfig } from './config.type';
 import {
   FILTER_TYPE,
   IPTVCategory,
@@ -14,4 +15,8 @@ export type API = {
   getFilteredActiveChannel: (type: FILTER_TYPE, code: string) => Promise<IPTVChannel[]>;
   getSingleChannelWithStream: (channelId: string) => Promise<IPTVChannelWithStream>;
   setIptvView: (filter: FILTER_TYPE, code?: string) => void;
+  getIptvView: () => Promise<AppConfig['iptvView']>;
+  clearAllCache: () => void;
+  getAppConfig: () => Promise<AppConfig['app']>;
+  setAppConfig: (newCfg: AppConfig['app']) => void;
 };

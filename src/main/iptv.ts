@@ -1,5 +1,5 @@
 import { net } from 'electron';
-import { getOrSetJSONCache } from './cache';
+import { ECache, getOrSetJSONCache } from './cache';
 import {
   FILTER_TYPE,
   IPTVCategory,
@@ -9,12 +9,16 @@ import {
   IPTVLanguage,
   IPTVStream
 } from '../preload/iptv.type';
+import config, { defaultAppConifg } from './config';
 
-const BASE_URL = 'https://iptv-org.github.io/api';
+const baseUrl = () => {
+  const url = config.chain.get('app.iptv.apiUrl', defaultAppConifg?.iptv?.apiUrl);
+  return url.value();
+};
 
 export const getAllCountry = async () => {
-  const content = await getOrSetJSONCache('countries', async () => {
-    const res = await net.fetch(BASE_URL + '/countries.json');
+  const content = await getOrSetJSONCache(ECache.COUNTRIES, async () => {
+    const res = await net.fetch(baseUrl() + '/countries.json');
     const json = await res.json();
     return json;
   });
@@ -22,8 +26,8 @@ export const getAllCountry = async () => {
   return content as IPTVCountry[];
 };
 export const getAllCategory = async () => {
-  const content = await getOrSetJSONCache('categories', async () => {
-    const res = await net.fetch(BASE_URL + '/categories.json');
+  const content = await getOrSetJSONCache(ECache.CATEGORIES, async () => {
+    const res = await net.fetch(baseUrl() + '/categories.json');
     const json = await res.json();
     return json;
   });
@@ -31,8 +35,8 @@ export const getAllCategory = async () => {
   return content as IPTVCategory[];
 };
 export const getAllLanguage = async () => {
-  const content = await getOrSetJSONCache('languages', async () => {
-    const res = await net.fetch(BASE_URL + '/languages.json');
+  const content = await getOrSetJSONCache(ECache.LANGUAGES, async () => {
+    const res = await net.fetch(baseUrl() + '/languages.json');
     const json = await res.json();
     return json;
   });
@@ -40,8 +44,8 @@ export const getAllLanguage = async () => {
   return content as IPTVLanguage[];
 };
 const getAllChannel = async () => {
-  const content = await getOrSetJSONCache('channels', async () => {
-    const res = await net.fetch(BASE_URL + '/channels.json');
+  const content = await getOrSetJSONCache(ECache.CHANNELS, async () => {
+    const res = await net.fetch(baseUrl() + '/channels.json');
     const json = await res.json();
     return json;
   });
@@ -49,8 +53,8 @@ const getAllChannel = async () => {
   return content as IPTVChannel[];
 };
 const getAllStreams = async () => {
-  const content = await getOrSetJSONCache('streams', async () => {
-    const res = await net.fetch(BASE_URL + '/streams.json');
+  const content = await getOrSetJSONCache(ECache.STREAMS, async () => {
+    const res = await net.fetch(baseUrl() + '/streams.json');
     const json = await res.json();
     return json;
   });

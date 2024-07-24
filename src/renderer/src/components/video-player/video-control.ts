@@ -1,12 +1,19 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { THEME } from '../../assets/theme';
-import { ChevronsLeft, ChevronsRight, Pause, Play } from 'lucide-static';
+import {
+  ChevronsLeft,
+  ChevronsRight,
+  Pause,
+  PictureInPicture,
+  PictureInPicture2,
+  Play
+} from 'lucide-static';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { FILTER_TYPE } from '../../../../preload/iptv.type';
 import '../channel-list';
 import { dispatchEvent, ECustomEvent } from '../../utils/event';
-import './control-button';
+import '../form/app-button';
 import './volume-control';
 import './fullscreen-button';
 
@@ -48,6 +55,9 @@ export class VideoControl extends LitElement {
   @state()
   _isMuted = false;
 
+  @state()
+  _isPip = false;
+
   private _listenVideo = (vid: HTMLMediaElement) => {
     if (localStorage.getItem('volume')) {
       vid.volume = Number(localStorage.getItem('volume'));
@@ -58,6 +68,10 @@ export class VideoControl extends LitElement {
     vid.onplay = () => (this._isPlaying = true);
     vid.onpause = () => (this._isPlaying = false);
     vid.onended = () => (this._isPlaying = false);
+    // @ts-expect-error
+    vid.onleavepictureinpicture = this._updatePip;
+    // @ts-expect-error
+    vid.onenterpictureinpicture = this._updatePip;
 
     vid.onvolumechange = () => {
       this._volume = vid.volume;
@@ -84,6 +98,21 @@ export class VideoControl extends LitElement {
     let newVal = !this._isMuted;
     this._video!.muted = newVal;
     localStorage.setItem('isMuted', newVal ? '1' : '0');
+  };
+
+  private _togglePip = async () => {
+    if (!document.pictureInPictureElement) {
+      if (document.pictureInPictureEnabled) {
+        // @ts-expect-error
+        this._video.requestPictureInPicture();
+      }
+    } else {
+      await document.exitFullscreen();
+    }
+  };
+  private _updatePip = async () => {
+    const isPip = document.pictureInPictureElement !== null;
+    this._isPip = isPip;
   };
 
   private _idleTimeout?: NodeJS.Timeout;
@@ -208,15 +237,15 @@ export class VideoControl extends LitElement {
       <footer>
         <div></div>
         <div class="main-control">
-          <control-button class="circle" @click=${() => dispatchEvent(ECustomEvent.prevChannel)}>
+          <app-button class="circle icon" @click=${() => dispatchEvent(ECustomEvent.prevChannel)}>
             ${unsafeHTML(ChevronsLeft)}
-          </control-button>
-          <control-button class="circle lg" @click=${this._handlePlay}>
+          </app-button>
+          <app-button class="circle icon lg" @click=${this._handlePlay}>
             ${unsafeHTML(this._isPlaying ? Pause : Play)}
-          </control-button>
-          <control-button class="circle" @click=${() => dispatchEvent(ECustomEvent.nextChannel)}>
+          </app-button>
+          <app-button class="circle icon" @click=${() => dispatchEvent(ECustomEvent.nextChannel)}>
             ${unsafeHTML(ChevronsRight)}
-          </control-button>
+          </app-button>
         </div>
         <div class="right-control">
           <volume-control
@@ -225,6 +254,9 @@ export class VideoControl extends LitElement {
             volume=${this._volume}
             ?isMuted=${this._isMuted}
           ></volume-control>
+          <app-button @click=${this._togglePip} class="icon"
+            >${unsafeHTML(this._isPip ? PictureInPicture2 : PictureInPicture)}</app-button
+          >
           <fullscreen-button></fullscreen-button>
         </div>
       </footer>

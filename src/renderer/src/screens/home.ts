@@ -5,7 +5,7 @@ import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import '../components/channel-list';
 import { navigate } from '../utils/routing';
-import '../components/video-player/control-button';
+import '../components/form/app-button';
 import '../components/video-player/fullscreen-button';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { Settings } from 'lucide-static';
@@ -73,8 +73,8 @@ export class HomeScreen extends LitElement {
       ></filter-list>
       <channel-list filter="${this.filter}" code="${this.code}">
         <div class="right-buttons" slot="right-component">
-          <control-button @click=${() => navigate('setting')}
-            >${unsafeHTML(Settings)}</control-button
+          <app-button class="icon" @click=${() => navigate('setting')}
+            >${unsafeHTML(Settings)}</app-button
           >
           <fullscreen-button></fullscreen-button>
         </div>

@@ -1,17 +1,18 @@
 import { customElement, state } from 'lit/decorators.js';
-import { ControlButton } from './control-button';
 import { html } from 'lit';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { Maximize2, Minimize2 } from 'lucide-static';
+import { AppButton } from '../form/app-button';
 
 @customElement('fullscreen-button')
-export class FullscreenButton extends ControlButton {
+export class FullscreenButton extends AppButton {
   @state()
   _isFullScreen = false;
   constructor() {
     super();
     this._updateFullScreenState();
     this.onclick = this._toggleFullScreen;
+    this.classList.add('icon');
   }
 
   private _updateFullScreenState = () => {
