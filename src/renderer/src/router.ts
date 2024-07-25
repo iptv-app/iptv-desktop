@@ -16,7 +16,7 @@ const ROUTES: Array<RouteItem & { regex: RegExp }> = [
       html`<watch-screen
         filter="${params[1]}"
         code="${params[2]}"
-        channel="${params[3]}"
+        channelId="${params[3]}"
       ></watch-screen>`
   },
   {

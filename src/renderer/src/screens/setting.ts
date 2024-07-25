@@ -4,7 +4,7 @@ import '../components/layout/page-title';
 import { AppConfig } from '../../../preload/config.type';
 import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { Globe, TvMinimalPlay } from 'lucide-static';
+import { Captions, Globe, TvMinimalPlay } from 'lucide-static';
 import '../components/layout/list-item';
 import '../components/form/text-input';
 import '../components/form/app-button';
@@ -34,6 +34,8 @@ interface Form {
 
   networkIsUseDOH?: boolean;
   networkDOHResolverUrl?: string;
+
+  captionIsAutoShow?: boolean;
 }
 
 @customElement('setting-screen')
@@ -48,7 +50,9 @@ export class SettingScreen extends LitElement {
     iptvCacheDuration: undefined,
 
     networkIsUseDOH: undefined,
-    networkDOHResolverUrl: undefined
+    networkDOHResolverUrl: undefined,
+
+    captionIsAutoShow: undefined
   };
 
   constructor() {
@@ -66,7 +70,9 @@ export class SettingScreen extends LitElement {
       iptvCacheDuration: config?.iptv?.cacheDuration?.toString(),
 
       networkIsUseDOH: config?.network?.isUseDOH,
-      networkDOHResolverUrl: config?.network?.dohResolverUrl
+      networkDOHResolverUrl: config?.network?.dohResolverUrl,
+
+      captionIsAutoShow: config?.caption?.isAutoShow
     };
   };
 
@@ -88,6 +94,9 @@ export class SettingScreen extends LitElement {
       network: {
         isUseDOH: val.networkIsUseDOH,
         dohResolverUrl: val.networkIsUseDOH ? val.networkDOHResolverUrl : undefined
+      },
+      caption: {
+        isAutoShow: val.captionIsAutoShow
       }
     };
     window.api.setAppConfig(dto);
@@ -175,6 +184,9 @@ export class SettingScreen extends LitElement {
           <list-item label="Network" class="lg bold"
             ><span slot="icon">${unsafeHTML(Globe)}</span></list-item
           >
+          <list-item label="Captions" class="lg bold"
+            ><span slot="icon">${unsafeHTML(Captions)}</span></list-item
+          >
         </div>
       </aside>
       <main>
@@ -210,6 +222,16 @@ export class SettingScreen extends LitElement {
           <div class="item">
             <label>DOH Resolver URL</label>
             <text-input ?disabled=${!this._form.networkIsUseDOH}  value=${this._form.networkDOHResolverUrl} @change=${(e: CustomEvent) => this._handleChange('networkDOHResolverUrl', e.detail)}></text-input>
+          </div>
+        </fieldset>
+        <fieldset>
+          <h2>Captions</h2>
+          <div class="item flex">
+            <div>
+              <label>Auto Show Caption</label>
+              <p>Automatically select and show available caption.<label>
+            </div>
+            <toggle-switch ?checked=${this._form.captionIsAutoShow} @change=${(e: CustomEvent) => this._handleChange('captionIsAutoShow', e.detail)}></toggle-switch>
           </div>
         </fieldset>
         <div class="right"><app-button class="primary" @click=${this._doSave}>Save Settings</app-button></div>

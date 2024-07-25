@@ -14,6 +14,9 @@ export const defaultAppConifg: AppConfig['app'] = {
   network: {
     isUseDOH: false,
     dohResolverUrl: 'https://chrome.cloudflare-dns.com/dns-query'
+  },
+  caption: {
+    isAutoShow: true
   }
 };
 

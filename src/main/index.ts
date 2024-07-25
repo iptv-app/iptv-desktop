@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import config from './config';
 import { registerCoreIPC, registerWindowIPC } from './ipc';
-import { bypassCORS, setupDOH } from './network';
+import { bypassCORS, customHeader, setupDOH } from './network';
 
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport');
 nativeTheme.themeSource = 'dark';
@@ -25,6 +25,7 @@ function createWindow(path: string): void {
 
   registerWindowIPC(mainWindow);
   bypassCORS(mainWindow);
+  customHeader(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();

@@ -34,6 +34,9 @@ export const registerCoreIPC = () => {
 };
 
 export const registerWindowIPC = (mainWindow: BrowserWindow) => {
+  mainWindow.webContents.executeJavaScript(
+    `window.__appConfig = ${JSON.stringify(config.chain.get('app').defaultsDeep(defaultAppConifg).value())};`
+  );
   ipcMain.handle('clearAllCache', () => {
     const res = dialog.showMessageBoxSync(mainWindow, {
       title: 'Clear Cache',
@@ -54,6 +57,9 @@ export const registerWindowIPC = (mainWindow: BrowserWindow) => {
     config.data.app = newCfg;
     config.write();
     setupDOH(app, newCfg);
+    mainWindow.webContents.executeJavaScript(
+      `window.__appConfig = ${JSON.stringify(config.chain.get('app').defaultsDeep(defaultAppConifg).value())};`
+    );
     dialog.showMessageBoxSync(mainWindow, {
       message: 'Settings Saved!',
       type: 'info'

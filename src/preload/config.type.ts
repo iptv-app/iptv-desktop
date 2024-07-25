@@ -15,5 +15,8 @@ export type AppConfig = {
       isUseDOH?: boolean;
       dohResolverUrl?: string;
     };
+    caption?: {
+      isAutoShow?: boolean;
+    };
   };
 };
