@@ -14,6 +14,14 @@ import '../components/form/select-item';
 
 const cacheDurationOptions: Option[] = [
   {
+    label: '15 Minutes',
+    value: (60 * 15).toString()
+  },
+  {
+    label: '30 Minutes',
+    value: (60 * 30).toString()
+  },
+  {
     label: '1 Hour',
     value: (60 * 60).toString()
   },
@@ -116,7 +124,11 @@ export class SettingScreen extends LitElement {
     el?.scrollIntoView({
       behavior: 'smooth'
     });
+    this._activeSide = id;
   };
+
+  @state()
+  _activeSide: string = 'iptv-data';
 
   static styles = [
     SCROLLBAR_STYLE,
@@ -181,6 +193,24 @@ export class SettingScreen extends LitElement {
       }
     `
   ];
+  static sideItems = [
+    {
+      label: 'IPTV Data',
+      id: 'iptv-data',
+      icon: TvMinimalPlay
+    },
+    {
+      label: 'Network',
+      id: 'network',
+      icon: Globe
+    },
+    {
+      label: 'Captions',
+      id: 'captions',
+      icon: Captions
+    }
+  ];
+
   protected render(): unknown {
     return html`
       <aside>
@@ -193,15 +223,14 @@ export class SettingScreen extends LitElement {
                 : undefined
             }
           ></page-title>
-          <list-item @click=${() => this._scrollTo('iptv-data')} label="IPTV Data" class="lg bold active"
-            ><span slot="icon">${unsafeHTML(TvMinimalPlay)}</span></list-item
-          >
-          <list-item @click=${() => this._scrollTo('network')} label="Network" class="lg bold"
-            ><span slot="icon">${unsafeHTML(Globe)}</span></list-item
-          >
-          <list-item @click=${() => this._scrollTo('captions')} label="Captions" class="lg bold"
-            ><span slot="icon">${unsafeHTML(Captions)}</span></list-item
-          >
+          ${SettingScreen.sideItems.map((item) => {
+            return html`<list-item
+              @click=${() => this._scrollTo(item.id)}
+              label=${item.label}
+              class="lg bold ${this._activeSide === item.id ? 'active' : undefined}"
+              ><span slot="icon">${unsafeHTML(item.icon)}</span></list-item
+            >`;
+          })}
         </div>
       </aside>
       <main>
