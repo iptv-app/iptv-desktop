@@ -9,6 +9,7 @@ import '../components/form/app-button';
 import '../components/video-player/fullscreen-button';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { Settings } from 'lucide-static';
+import '../components/layout/with-titlebar';
 
 @customElement('home-screen')
 export class HomeScreen extends LitElement {
@@ -38,22 +39,27 @@ export class HomeScreen extends LitElement {
     SCROLLBAR_STYLE,
     css`
       :host {
+        display: block;
+        height: 100%;
+      }
+      #container {
         display: flex;
         gap: 10px;
         margin: 0;
         padding: 0;
         background-color: ${THEME.BG_COLOR};
         color: ${THEME.FG_COLOR};
+        height: 100%;
       }
       filter-list {
         width: 300px;
-        height: 100vh;
+        height: 100%;
         overflow-y: scroll;
         border-right: 1px solid ${THEME.BG_SECONDARY_COLOR};
       }
       channel-list {
         flex: 1;
-        height: 100vh;
+        height: 100%;
         overflow-y: scroll;
       }
       .right-buttons {
@@ -65,19 +71,22 @@ export class HomeScreen extends LitElement {
     `
   ];
   protected render(): unknown {
-    return html`<filter-list
-        filter="${this.filter}"
-        @changeFilter="${this._onChangeFilter}"
-        code="${this.code}"
-        @changeCode="${this._onChangeCode}"
-      ></filter-list>
-      <channel-list filter="${this.filter}" code="${this.code}">
-        <div class="right-buttons" slot="right-component">
-          <app-button class="icon" @click=${() => navigate('setting')}
-            >${unsafeHTML(Settings)}</app-button
-          >
-          <fullscreen-button></fullscreen-button>
-        </div>
-      </channel-list>`;
+    return html`<with-titlebar
+      ><div id="container">
+        <filter-list
+          filter="${this.filter}"
+          @changeFilter="${this._onChangeFilter}"
+          code="${this.code}"
+          @changeCode="${this._onChangeCode}"
+        ></filter-list>
+        <channel-list filter="${this.filter}" code="${this.code}">
+          <div class="right-buttons" slot="right-component">
+            <app-button class="icon" @click=${() => navigate('setting')}
+              >${unsafeHTML(Settings)}</app-button
+            >
+            <fullscreen-button></fullscreen-button>
+          </div>
+        </channel-list></div
+    ></with-titlebar>`;
   }
 }

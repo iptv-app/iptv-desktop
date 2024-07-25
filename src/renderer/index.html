@@ -9,11 +9,13 @@
       content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:;font-src 'self' data:;media-src * blob: data:;connect-src *;"
     />
     <style>
+      @import url('@fontsource/noto-color-emoji/emoji-400.css');
       :root {
         color-scheme: dark;
       }
       body {
-        font-family: sans-serif;
+        font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+          'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
         margin: 0;
         padding: 0;
       }

@@ -141,6 +141,9 @@ export class ChannelList extends LitElement {
       box-shadow: 0 10px 20px ${THEME.BG_COLOR};
       padding: 20px;
     }
+    :host(.with-titlebar) header {
+      padding-top: 10px;
+    }
     header.vertical {
       position: static;
       background: transparent;

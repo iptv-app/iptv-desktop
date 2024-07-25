@@ -57,10 +57,15 @@ export class ListItem extends LitElement {
       color: ${THEME.PRIMARY_FG_COLOR};
       font-weight: bold;
     }
+    .icon {
+      font-family: 'Noto Color Emoji';
+    }
   `;
 
   protected render(): unknown {
-    return html`${this.icon ? html`<span>${this.icon}</span>` : html`<slot name="icon" />`}
+    return html`${this.icon
+        ? html`<span class="icon">${this.icon}</span>`
+        : html`<span class="custom-icon"><slot name="icon" /></span>`}
       <span class="label" title="${this.label}">${this.label}</span> `;
   }
 }

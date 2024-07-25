@@ -11,6 +11,7 @@ import '../components/form/app-button';
 import '../components/form/toggle-switch';
 import { Option } from '../components/form/select-item';
 import '../components/form/select-item';
+import '../components/layout/with-titlebar';
 
 const cacheDurationOptions: Option[] = [
   {
@@ -134,10 +135,14 @@ export class SettingScreen extends LitElement {
     SCROLLBAR_STYLE,
     css`
       :host {
+        display: block;
+        height: 100%;
+      }
+      #content {
         margin: 0;
         padding: 0;
         display: flex;
-        height: 100vh;
+        height: 100%;
         user-select: none;
         overflow: hidden;
       }
@@ -212,7 +217,8 @@ export class SettingScreen extends LitElement {
   ];
 
   protected render(): unknown {
-    return html`
+    return html`<with-titlebar>
+    <div id="content">
       <aside>
         <div class="sticky">
           <page-title
@@ -293,8 +299,9 @@ export class SettingScreen extends LitElement {
           </div>
         </fieldset>
         <div class="right"><app-button class="primary" @click=${this._doSave}>Save Settings</app-button></div>
-        </div>
+      </div>
       </main>
-    `;
+      </div>
+      </with-titlebar>`;
   }
 }

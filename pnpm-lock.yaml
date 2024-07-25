@@ -14,6 +14,9 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^3.0.0
         version: 3.0.0(electron@31.2.1)
+      '@fontsource/noto-color-emoji':
+        specifier: ^5.0.27
+        version: 5.0.27
       '@lit/task':
         specifier: ^1.0.1
         version: 1.0.1
@@ -387,6 +390,9 @@ packages:
   '@eslint/js@8.57.0':
     resolution: {integrity: sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  '@fontsource/noto-color-emoji@5.0.27':
+    resolution: {integrity: sha512-gsIMN5o8qoRLrA+XyDNKKnMNpTbwpNbINisJqirLOLXl83arOV2sHRnNOkVht2gzUcImUxEUBGektp56G3Vj9w==}
 
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
@@ -2367,6 +2373,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.0': {}
+
+  '@fontsource/noto-color-emoji@5.0.27': {}
 
   '@humanwhocodes/config-array@0.11.14':
     dependencies:

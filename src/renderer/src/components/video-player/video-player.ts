@@ -323,6 +323,14 @@ export class VideoPlayer extends LitElement {
       position: relative;
       overflow: hidden;
     }
+    #titlebar {
+      position: fixed;
+      height: env(titlebar-area-height, 30px);
+      -webkit-app-region: drag;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
     #video-container {
       height: 100%;
       width: 100%;
@@ -357,6 +365,7 @@ export class VideoPlayer extends LitElement {
       cursor: none;
     }
     aside {
+      padding-top: env(titlebar-area-height, 30px);
       position: absolute;
       top: 0;
       left: -450px;
@@ -437,6 +446,7 @@ export class VideoPlayer extends LitElement {
     const _visibleClass = this._isControlVisible || this._isMouseOverControl ? 'visible' : '';
 
     return html`<div id="video-container">
+        <div id="titlebar"></div>
         ${VideoPlayer._video}
         <player-error
           .details=${this.error}

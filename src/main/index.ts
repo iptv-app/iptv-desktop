@@ -24,6 +24,12 @@ function createWindow(hash: string): void {
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false
+    },
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#0a0a12',
+      symbolColor: '#ffffff',
+      height: 30
     }
   });
 
