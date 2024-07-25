@@ -2,10 +2,14 @@
   "name": "iptv-desktop",
   "version": "0.0.1",
   "type": "module",
-  "description": "A minimal Electron application with TypeScript",
+  "description": "Play IPTV from your desktop.",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": {
+    "name": "Muhammad Hasan Firdaus",
+    "email": "hasanteam008@gmail.com"
+  },
+  "homepage": "https://github.com/hsnfirdaus/iptv-desktop",
+  "license": "MIT",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",

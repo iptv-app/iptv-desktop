@@ -9,7 +9,7 @@ import { bypassCORS, customHeader, setupDOH } from './network';
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport');
 nativeTheme.themeSource = 'dark';
 
-function createWindow(path: string): void {
+function createWindow(hash: string): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1280,
@@ -17,6 +17,8 @@ function createWindow(path: string): void {
     minWidth: 1024,
     minHeight: 576,
     show: false,
+    darkTheme: true,
+    backgroundColor: '#0a0a12',
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -41,9 +43,9 @@ function createWindow(path: string): void {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/' + path);
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/index.html#' + hash);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/' + path));
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash });
   }
 }
 
@@ -65,19 +67,17 @@ app.whenReady().then(() => {
   registerCoreIPC();
 
   const iptvView = config.data.iptvView;
-  var hash = '#home/' + iptvView.filter;
+  var hash = 'home/' + iptvView.filter;
   if (iptvView.code) {
     hash = hash + '/' + iptvView.code;
   }
 
-  const homePath = 'index.html' + hash;
-
-  createWindow(homePath);
+  createWindow(hash);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow(homePath);
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(hash);
   });
 });
 

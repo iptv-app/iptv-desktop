@@ -2,6 +2,7 @@ appId: app.iptv.desktop
 productName: IPTV Desktop
 directories:
   buildResources: build
+electronLanguages: ['en']
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -30,14 +31,8 @@ dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
   target:
-    - AppImage
-    - deb
     - rpm
-  maintainer: electronjs.org
   category: Video
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
