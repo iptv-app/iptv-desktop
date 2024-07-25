@@ -9,6 +9,8 @@ import { waitForElement } from '../utils/dom';
 import { ECustomEvent } from '../utils/event';
 import './layout/page-title';
 import './form/search-input';
+import './layout/spinner-loading';
+import { channelName } from '../utils/channel';
 
 @customElement('channel-list')
 export class ChannelList extends LitElement {
@@ -202,6 +204,7 @@ export class ChannelList extends LitElement {
       </header>
       <div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
         ${this._channelList.render({
+          pending: () => html`<spinner-loading></spinner-loading>`,
           complete: (channels) =>
             channels
               .filter(
@@ -219,7 +222,7 @@ export class ChannelList extends LitElement {
                     : ''}"
                   @click="${() => this._onClickChannel(channel.id)}"
                   .logo="${channel.logo}"
-                  .name="${channel.alt_names[0] ?? channel.name}"
+                  .name="${channelName(channel)}"
                 ></channel-item>`;
               })
         })}

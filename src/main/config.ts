@@ -9,14 +9,16 @@ export const defaultAppConifg: AppConfig['app'] = {
   iptv: {
     isOverrideApi: false,
     apiUrl: 'https://iptv-org.github.io/api',
-    cacheDuration: 60 * 60 * 24
+    cacheDuration: 60 * 60 * 24,
+    isUseAltChannelName: true
   },
   network: {
     isUseDOH: false,
     dohResolverUrl: 'https://chrome.cloudflare-dns.com/dns-query'
   },
   caption: {
-    isAutoShow: true
+    isAutoShow: true,
+    isEnableCEA708: true
   }
 };
 

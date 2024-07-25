@@ -10,6 +10,7 @@ export type AppConfig = {
       isOverrideApi?: boolean;
       apiUrl?: string;
       cacheDuration?: number;
+      isUseAltChannelName?: boolean;
     };
     network?: {
       isUseDOH?: boolean;
@@ -17,6 +18,7 @@ export type AppConfig = {
     };
     caption?: {
       isAutoShow?: boolean;
+      isEnableCEA708?: boolean;
     };
   };
 };

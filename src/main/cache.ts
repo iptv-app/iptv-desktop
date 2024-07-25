@@ -20,7 +20,7 @@ export const getJSONCache = (type: ECache) => {
 
   try {
     const stat = statSync(path);
-    const expDate = stat.birthtime.getTime() + parseInt(duration + '00');
+    const expDate = stat.birthtime.getTime() + parseInt(duration + '000');
     const currentTime = new Date().getTime();
     if (expDate < currentTime) {
       unlinkSync(path);

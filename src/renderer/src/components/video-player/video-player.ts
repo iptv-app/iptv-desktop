@@ -18,7 +18,10 @@ import './volume-control';
 import './fullscreen-button';
 import './caption-button';
 import './quality-button';
-import Hls, { Events, Level, MediaPlaylist } from 'hls.js';
+import '../layout/spinner-loading';
+import './player-error';
+import Hls, { ErrorDetails, Events, Level, MediaPlaylist } from 'hls.js';
+import { channelName } from '../../utils/channel';
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -51,6 +54,12 @@ export class VideoPlayer extends LitElement {
   _isControlVisible = true;
 
   @state()
+  _isBuffering = false;
+
+  @state()
+  error?: Error;
+
+  @state()
   _isPlaying = false;
 
   @state()
@@ -75,19 +84,32 @@ export class VideoPlayer extends LitElement {
   _activeQualityIdx: number = -1;
 
   private static _video = document.createElement('video');
-  private static _caption = document.createElement('span');
+  private static _caption = document.createElement('div');
   private static _track = VideoPlayer._video.addTextTrack('captions');
   private _hls = new Hls({
     renderTextTracksNatively: false,
     subtitlePreference: {
       default: false
-    }
+    },
+    enableCEA708Captions: window.__appConfig?.caption?.isEnableCEA708
   });
 
   constructor() {
     super();
     VideoPlayer._video.autoplay = true;
     this._hls.attachMedia(VideoPlayer._video);
+    this._hls.on(Events.ERROR, (_e, data) => {
+      if (data.details === ErrorDetails.BUFFER_STALLED_ERROR) {
+        this._isBuffering = true;
+      } else {
+        this._isBuffering = false;
+        this.error = data.error;
+      }
+    });
+    this._hls.on(Events.FRAG_BUFFERED, () => {
+      this.error = undefined;
+      this._isBuffering = false;
+    });
 
     this._hls.on(Events.MANIFEST_PARSED, (_e, data) => {
       this._qualityList = data.levels;
@@ -109,6 +131,7 @@ export class VideoPlayer extends LitElement {
       }
     });
     this._hls.on(Events.SUBTITLE_TRACK_SWITCH, (_e, data) => {
+      VideoPlayer._caption.innerHTML = '';
       this._activeCaptionIdx = data.id;
     });
 
@@ -116,13 +139,22 @@ export class VideoPlayer extends LitElement {
     this._hls.on(Events.CUES_PARSED, (_e, data) => {
       for (const item of data.cues) {
         const cue = item as VTTCue;
+
         cue.onenter = () => {
-          VideoPlayer._caption.innerHTML = '';
-          VideoPlayer._caption.appendChild(cue.getCueAsHTML());
-          VideoPlayer._caption.style.display = 'inline';
+          const content = cue.text;
+          const el = document.createElement('div');
+          el.setAttribute('data-caption-id', cue.id);
+          const span = document.createElement('span');
+          span.innerText = content;
+          el.appendChild(span);
+
+          VideoPlayer._caption.appendChild(el);
         };
         cue.onexit = () => {
-          VideoPlayer._caption.style.display = 'none';
+          const el = this.shadowRoot!.querySelector('[data-caption-id="' + cue.id + '"]');
+          if (el) {
+            VideoPlayer._caption.removeChild(el);
+          }
         };
         VideoPlayer._track.addCue(cue);
       }
@@ -159,6 +191,7 @@ export class VideoPlayer extends LitElement {
   }
 
   disconnectedCallback(): void {
+    VideoPlayer._caption.innerHTML = '';
     this._hls?.destroy();
 
     navigator.mediaSession.setActionHandler('previoustrack', null);
@@ -172,7 +205,7 @@ export class VideoPlayer extends LitElement {
       this._streamList = channel.streams;
       this._loadStream(0);
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: channel.alt_names[0] ?? channel.name,
+        title: channelName(channel),
         artist: channel.network || channel.owners.join(', ') || 'IPTV Desktop',
         artwork: [
           {
@@ -192,22 +225,21 @@ export class VideoPlayer extends LitElement {
   private _loadStream = (index: number) => {
     const stream = this._streamList?.[index];
     if (!stream) return;
-    VideoPlayer._caption.style.display = 'none';
+
+    VideoPlayer._caption.innerHTML = '';
 
     var videoSrc = stream.url;
-    if (Hls.isSupported()) {
-      this._hls.config.xhrSetup = (xhr, _url) => {
-        if (stream.http_referrer) {
-          xhr.setRequestHeader('X-Custom-Referer', stream.http_referrer);
-        }
-        if (stream.user_agent) {
-          xhr.setRequestHeader('X-Custom-User-Agent', stream.user_agent);
-        }
-      };
-      this._hls.loadSource(videoSrc);
-    } else if (VideoPlayer._video.canPlayType('application/vnd.apple.mpegurl')) {
-      VideoPlayer._video.src = videoSrc;
-    }
+    this._hls.config.xhrSetup = (xhr, _url) => {
+      if (stream.http_referrer) {
+        xhr.setRequestHeader('X-Custom-Referer', stream.http_referrer);
+      }
+      if (stream.user_agent) {
+        xhr.setRequestHeader('X-Custom-User-Agent', stream.user_agent);
+      }
+    };
+    this.error = undefined;
+    this._isBuffering = true;
+    this._hls.loadSource(videoSrc);
   };
 
   private _handlePlay = () => {
@@ -303,6 +335,16 @@ export class VideoPlayer extends LitElement {
       object-fit: contain;
       box-sizing: border-box;
     }
+    spinner-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    spinner-loading.hidden {
+      display: none;
+    }
     #control-container {
       position: absolute;
       top: 0;
@@ -379,7 +421,9 @@ export class VideoPlayer extends LitElement {
       top: 20%;
       display: flex;
       align-items: flex-end;
+      justify-content: center;
       flex-direction: row;
+      text-align: center;
     }
     .captions span {
       background-color: ${THEME.BG_COLOR_TRANS};
@@ -394,6 +438,11 @@ export class VideoPlayer extends LitElement {
 
     return html`<div id="video-container">
         ${VideoPlayer._video}
+        <player-error
+          .details=${this.error}
+          class=${this.error === undefined ? 'hidden' : undefined}
+        ></player-error>
+        <spinner-loading class="${this._isBuffering ? 'show' : 'hidden'}"></spinner-loading>
         <div class="captions"><div>${VideoPlayer._caption}</div></div>
       </div>
       <div id="control-container" class="${_visibleClass}">

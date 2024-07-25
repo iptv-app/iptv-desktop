@@ -7,6 +7,7 @@ import './filter-select';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
 import { waitForElement } from '../utils/dom';
 import './form/search-input';
+import './layout/spinner-loading';
 
 type ListItem = {
   code: string;
@@ -147,6 +148,7 @@ export class FilterList extends LitElement {
       </header>
       <div class="items">
         ${this._filterContents.render({
+          pending: () => html`<spinner-loading></spinner-loading>`,
           complete: (items) =>
             items
               .filter(
@@ -164,7 +166,8 @@ export class FilterList extends LitElement {
                   label="${item.label}"
                   icon="${item.icon}"
                 ></list-item>`;
-              })
+              }),
+          error: (e) => html`<p>Error: ${e}</p>`
         })}
       </div>
     `;

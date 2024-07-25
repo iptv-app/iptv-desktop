@@ -15,7 +15,7 @@ export const THEME = {
 };
 export const SCROLLBAR_STYLE = css`
   ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
   }
   ::-webkit-scrollbar-track {
     background: ${THEME.BG_COLOR};
@@ -23,7 +23,6 @@ export const SCROLLBAR_STYLE = css`
   ::-webkit-scrollbar-thumb {
     background-color: ${THEME.BG_SECONDARY_COLOR};
     border-radius: 5px;
-    border-right: 4px solid ${THEME.BG_COLOR};
   }
   ::-webkit-scrollbar-thumb:hover {
     background-color: ${THEME.BG_SECONDARY_HOVER_COLOR};
