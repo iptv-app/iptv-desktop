@@ -32,12 +32,12 @@ jobs:
 
       - name: Package Linux
         if: startsWith(matrix.os, 'ubuntu')
-        run: pnpm build:linux
+        run: pnpm build:linux --publish always
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} --publish always
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package Windows
         if: startsWith(matrix.os, 'windows')
-        run: pnpm build:win
+        run: pnpm build:win --publish always
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} --publish always
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
