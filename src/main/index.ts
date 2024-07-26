@@ -6,7 +6,6 @@ import config from './config';
 import { registerCoreIPC, registerWindowIPC } from './ipc';
 import { bypassCORS, customHeader, setupDOH } from './network';
 
-app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport');
 nativeTheme.themeSource = 'dark';
 
 function createWindow(hash: string): void {

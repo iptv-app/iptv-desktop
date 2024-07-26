@@ -196,6 +196,10 @@ export class SettingScreen extends LitElement {
       .container {
         max-width: 600px;
       }
+      span[slot='icon'],
+      span[slot='icon'] svg {
+        display: block;
+      }
     `
   ];
   static sideItems = [

@@ -65,7 +65,7 @@ export class ListItem extends LitElement {
   protected render(): unknown {
     return html`${this.icon
         ? html`<span class="icon">${this.icon}</span>`
-        : html`<span class="custom-icon"><slot name="icon" /></span>`}
+        : html`<div class="custom-icon"><slot name="icon" /></div>`}
       <span class="label" title="${this.label}">${this.label}</span> `;
   }
 }

@@ -205,11 +205,11 @@ export class ChannelList extends LitElement {
           <slot name="right-component" />
         </div>
       </header>
-      <div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
-        ${this._channelList.render({
-          pending: () => html`<spinner-loading></spinner-loading>`,
-          complete: (channels) =>
-            channels
+      ${this._channelList.render({
+        pending: () => html`<spinner-loading></spinner-loading>`,
+        complete: (channels) =>
+          html`<div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
+            ${channels
               .filter(
                 (item) =>
                   !this._searchDebounced ||
@@ -227,9 +227,9 @@ export class ChannelList extends LitElement {
                   .logo="${channel.logo}"
                   .name="${channelName(channel)}"
                 ></channel-item>`;
-              })
-        })}
-      </div>
+              })}
+          </div>`
+      })}
     `;
   }
 }

@@ -20,6 +20,7 @@ export class AppButton extends LitElement {
       padding-left: 20px;
       padding-right: 20px;
       user-select: none;
+      line-height: 1;
     }
     :host(.primary) {
       background-color: ${THEME.PRIMARY_COLOR};
