@@ -8,7 +8,8 @@
     "name": "Muhammad Hasan Firdaus",
     "email": "hasanteam008@gmail.com"
   },
-  "homepage": "https://github.com/hsnfirdaus/iptv-desktop",
+  "homepage": "https://github.com/iptv-app/iptv-desktop",
+  "repository": "https://github.com/iptv-app/iptv-desktop",
   "license": "MIT",
   "scripts": {
     "format": "prettier --write .",

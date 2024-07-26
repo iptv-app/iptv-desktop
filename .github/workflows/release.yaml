@@ -1,0 +1,43 @@
+name: Release
+on:
+  create:
+    tags:
+      - v*
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Package Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: pnpm build:linux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} --publish always
+
+      - name: Package Windows
+        if: startsWith(matrix.os, 'windows')
+        run: pnpm build:win
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} --publish always

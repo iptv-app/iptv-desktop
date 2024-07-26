@@ -9,6 +9,7 @@ files:
   - '!{.eslintignore,.eslintrc.js,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!*.png'
 electronLanguages: ['en-US']
 asarUnpack:
   - resources/**
@@ -32,6 +33,8 @@ dmg:
 linux:
   target:
     - rpm
+    - deb
+    - AppImage
   category: Video
 appImage:
   artifactName: ${name}-${version}.${ext}
