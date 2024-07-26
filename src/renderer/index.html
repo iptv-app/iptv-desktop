@@ -9,7 +9,14 @@
       content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src * data:;font-src 'self' data:;media-src * blob: data:;connect-src *;"
     />
     <style>
-      @import url('@fontsource/noto-color-emoji/emoji-400.css');
+      @font-face {
+        font-family: 'Noto Color Emoji';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src: url('@fontsource/noto-color-emoji/files/noto-color-emoji-emoji-400-normal.woff2')
+          format('woff2');
+      }
       :root {
         color-scheme: dark;
       }

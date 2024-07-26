@@ -92,7 +92,7 @@ export class ChannelItem extends LitElement {
   protected render(): unknown {
     return html`
       <div class="logo">
-        <img onerror="this.src='${LogoPlaceholder}'" src="${this.logo}" alt="" />
+        <img loading="lazy" onerror="this.src='${LogoPlaceholder}'" src="${this.logo}" alt="" />
       </div>
       <h3>${this.name}</h3>
     `;

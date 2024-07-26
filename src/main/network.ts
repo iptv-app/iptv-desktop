@@ -52,5 +52,9 @@ export const setupDOH = (app: Electron.App, config: AppConfig['app']) => {
       secureDnsMode: 'secure',
       secureDnsServers: config.network.dohResolverUrl ? [config.network.dohResolverUrl] : undefined
     });
+  } else {
+    app.configureHostResolver({
+      secureDnsMode: 'off'
+    });
   }
 };

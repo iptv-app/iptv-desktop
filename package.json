@@ -28,27 +28,30 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
-    "@fontsource/noto-color-emoji": "^5.0.27",
-    "@lit/task": "^1.0.1",
-    "hls.js": "^1.5.13",
-    "lit": "^3.1.4",
     "lodash": "^4.17.21",
-    "lowdb": "^7.0.1",
-    "lucide-static": "^0.411.0"
+    "lowdb": "^7.0.1"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@fontsource/noto-color-emoji": "^5.0.27",
+    "@lit/task": "^1.0.1",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^20.14.8",
-    "electron": "^31.0.2",
+    "@types/node": "^20.14.12",
+    "electron": "^31.3.0",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.2",
-    "vite": "^5.3.1"
+    "hls.js": "^1.5.13",
+    "lit": "^3.1.4",
+    "lucide-static": "^0.411.0",
+    "prettier": "^3.3.3",
+    "rollup-plugin-html-literals": "^1.1.8",
+    "rollup-plugin-summary": "^2.0.1",
+    "terser": "^5.31.3",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5"
   },
   "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
 }

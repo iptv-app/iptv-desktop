@@ -59,6 +59,7 @@ export class ListItem extends LitElement {
     }
     .icon {
       font-family: 'Noto Color Emoji';
+      width: 20px;
     }
   `;
 

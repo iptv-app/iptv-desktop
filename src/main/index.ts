@@ -6,12 +6,11 @@ import config, { defaultAppConifg } from './config';
 import { bypassCORS, customHeader, setupDOH } from './network';
 import { IPCHandler } from './ipc';
 
+app.commandLine.appendSwitch('lang', 'en-US');
 nativeTheme.themeSource = 'dark';
-
 const ipcHandler = new IPCHandler();
 
-function createWindow(hash: string): void {
-  // Create the browser window.
+const createMainWindow = async (hash: string) => {
   const isSystemTitleBar = config.chain
     .get(
       'app.userInterface.isUseSystemTitlebar',
@@ -47,10 +46,6 @@ function createWindow(hash: string): void {
   bypassCORS(mainWindow);
   customHeader(mainWindow);
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
-  });
-
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
@@ -59,24 +54,17 @@ function createWindow(hash: string): void {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/index.html#' + hash);
+    await mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/index.html#' + hash);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash });
+    await mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash });
   }
-}
+  mainWindow.show();
+};
+ipcHandler.setCreateMainWindow(createMainWindow);
 
-ipcHandler.setCreateMainWindow(createWindow);
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
+app.on('ready', () => {
   electronApp.setAppUserModelId('app.iptv.desktop');
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
@@ -90,23 +78,15 @@ app.whenReady().then(() => {
     hash = hash + '/' + iptvView.code;
   }
 
-  createWindow(hash);
+  createMainWindow(hash);
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow(hash);
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createMainWindow(hash);
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.

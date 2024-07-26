@@ -6,10 +6,11 @@ import {
   getFilteredActiveChannel,
   getSingleChannelWithStream
 } from './iptv';
-import { BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { clearAllCache } from './cache';
 import config, { defaultAppConifg } from './config';
 import { AppConfig } from '../preload/config.type';
+import { setupDOH } from './network';
 
 export class IPCHandler {
   private _mainWindow?: BrowserWindow;
@@ -54,6 +55,7 @@ export class IPCHandler {
       if (res === 1) {
         clearAllCache();
         dialog.showMessageBoxSync(this._mainWindow!, {
+          title: 'IPTV Desktop',
           message: 'Cache Cleared!',
           type: 'info'
         });
@@ -65,10 +67,12 @@ export class IPCHandler {
       config.data.app = newCfg;
       config.write();
       dialog.showMessageBoxSync(this._mainWindow!, {
+        title: 'IPTV Desktop',
         message: 'Settings Saved!',
         type: 'info'
       });
       this._mainWindow!.close();
+      setupDOH(app, newCfg);
       this._createMainWindow!(relaunchHash);
     });
   }
