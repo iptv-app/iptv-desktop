@@ -13,6 +13,17 @@ const TYPES: { [key in FILTER_TYPE]: string } = {
 
 @customElement('filter-select')
 export class FilterSelect extends LitElement {
+  tabIndex = 1;
+
+  constructor() {
+    super();
+    this.onblur = () => {
+      if (this._isOpen) {
+        this._isOpen = false;
+      }
+    };
+  }
+
   @property()
   value?: FILTER_TYPE;
 

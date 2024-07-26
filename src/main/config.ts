@@ -19,6 +19,9 @@ export const defaultAppConifg: AppConfig['app'] = {
   caption: {
     isAutoShow: true,
     isEnableCEA708: true
+  },
+  userInterface: {
+    isUseSystemTitlebar: process.platform === 'linux' ? true : false
   }
 };
 

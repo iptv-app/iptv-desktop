@@ -2,14 +2,23 @@ import { app, shell, BrowserWindow, nativeTheme } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import config from './config';
-import { registerCoreIPC, registerWindowIPC } from './ipc';
+import config, { defaultAppConifg } from './config';
 import { bypassCORS, customHeader, setupDOH } from './network';
+import { IPCHandler } from './ipc';
 
 nativeTheme.themeSource = 'dark';
 
+const ipcHandler = new IPCHandler();
+
 function createWindow(hash: string): void {
   // Create the browser window.
+  const isSystemTitleBar = config.chain
+    .get(
+      'app.userInterface.isUseSystemTitlebar',
+      defaultAppConifg?.userInterface?.isUseSystemTitlebar
+    )
+    .value();
+
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
@@ -24,15 +33,17 @@ function createWindow(hash: string): void {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false
     },
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#0a0a12',
-      symbolColor: '#ffffff',
-      height: 30
-    }
+    titleBarStyle: isSystemTitleBar ? 'default' : 'hidden',
+    titleBarOverlay: isSystemTitleBar
+      ? undefined
+      : {
+          color: '#0a0a12',
+          symbolColor: '#ffffff',
+          height: 30
+        }
   });
+  ipcHandler.setMainWindow(mainWindow);
 
-  registerWindowIPC(mainWindow);
   bypassCORS(mainWindow);
   customHeader(mainWindow);
 
@@ -54,6 +65,8 @@ function createWindow(hash: string): void {
   }
 }
 
+ipcHandler.setCreateMainWindow(createWindow);
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -69,7 +82,7 @@ app.whenReady().then(() => {
   });
 
   setupDOH(app, config.data.app);
-  registerCoreIPC();
+  ipcHandler.registerIPC();
 
   const iptvView = config.data.iptvView;
   var hash = 'home/' + iptvView.filter;

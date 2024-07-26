@@ -20,5 +20,8 @@ export type AppConfig = {
       isAutoShow?: boolean;
       isEnableCEA708?: boolean;
     };
+    userInterface?: {
+      isUseSystemTitlebar?: boolean;
+    };
   };
 };

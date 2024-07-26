@@ -4,7 +4,7 @@ import '../components/layout/page-title';
 import { AppConfig } from '../../../preload/config.type';
 import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { Captions, Globe, TvMinimalPlay } from 'lucide-static';
+import { AppWindow, Captions, Globe, TvMinimalPlay } from 'lucide-static';
 import '../components/layout/list-item';
 import '../components/form/text-input';
 import '../components/form/app-button';
@@ -47,6 +47,8 @@ interface Form {
 
   captionIsAutoShow?: boolean;
   captionIsEnableCEA708?: boolean;
+
+  userInterfaceIsUseSystemTitlebar?: boolean;
 }
 
 @customElement('setting-screen')
@@ -65,7 +67,9 @@ export class SettingScreen extends LitElement {
     networkDOHResolverUrl: undefined,
 
     captionIsAutoShow: undefined,
-    captionIsEnableCEA708: undefined
+    captionIsEnableCEA708: undefined,
+
+    userInterfaceIsUseSystemTitlebar: undefined
   };
 
   constructor() {
@@ -87,7 +91,9 @@ export class SettingScreen extends LitElement {
       networkDOHResolverUrl: config?.network?.dohResolverUrl,
 
       captionIsAutoShow: config?.caption?.isAutoShow,
-      captionIsEnableCEA708: config?.caption?.isEnableCEA708
+      captionIsEnableCEA708: config?.caption?.isEnableCEA708,
+
+      userInterfaceIsUseSystemTitlebar: config?.userInterface?.isUseSystemTitlebar
     };
   };
 
@@ -114,9 +120,12 @@ export class SettingScreen extends LitElement {
       caption: {
         isAutoShow: val.captionIsAutoShow,
         isEnableCEA708: val.captionIsEnableCEA708
+      },
+      userInterface: {
+        isUseSystemTitlebar: val.userInterfaceIsUseSystemTitlebar
       }
     };
-    window.api.setAppConfig(dto);
+    window.api.setAppConfig(dto, window.location.hash.substring(1));
     this._loadData();
   };
 
@@ -217,6 +226,11 @@ export class SettingScreen extends LitElement {
       label: 'Captions',
       id: 'captions',
       icon: Captions
+    },
+    {
+      label: 'User Interface',
+      id: 'user-interface',
+      icon: AppWindow
     }
   ];
 
@@ -300,6 +314,16 @@ export class SettingScreen extends LitElement {
               <p>Enable and show CEA 708 caption.<label>
             </div>
             <toggle-switch ?checked=${this._form.captionIsEnableCEA708} @change=${(e: CustomEvent) => this._handleChange('captionIsEnableCEA708', e.detail)}></toggle-switch>
+          </div>
+        </fieldset>
+        <fieldset>
+          <h2 id="user-interface">User Interface</h2>
+          <div class="item flex">
+            <div>
+              <label>Use System Titlebar</label>
+              <p>Use default system titlebar instead of custom one.<label>
+            </div>
+            <toggle-switch ?checked=${this._form.userInterfaceIsUseSystemTitlebar} @change=${(e: CustomEvent) => this._handleChange('userInterfaceIsUseSystemTitlebar', e.detail)}></toggle-switch>
           </div>
         </fieldset>
         <div class="right"><app-button class="primary" @click=${this._doSave}>Save Settings</app-button></div>

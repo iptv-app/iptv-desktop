@@ -10,9 +10,14 @@ export class FullscreenButton extends AppButton {
   _isFullScreen = false;
   constructor() {
     super();
-    this._updateFullScreenState();
     this.onclick = this._toggleFullScreen;
     this.classList.add('icon');
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    document.onfullscreenchange = this._updateFullScreenState;
+    this._updateFullScreenState();
   }
 
   private _updateFullScreenState = () => {
@@ -25,7 +30,6 @@ export class FullscreenButton extends AppButton {
     } else {
       await document.exitFullscreen();
     }
-    this._updateFullScreenState();
   };
 
   protected render(): unknown {

@@ -18,5 +18,5 @@ export type API = {
   getIptvView: () => Promise<AppConfig['iptvView']>;
   clearAllCache: () => void;
   getAppConfig: () => Promise<AppConfig['app']>;
-  setAppConfig: (newCfg: AppConfig['app']) => void;
+  setAppConfig: (newCfg: AppConfig['app'], relaunchHash: string) => void;
 };

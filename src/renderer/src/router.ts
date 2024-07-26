@@ -4,6 +4,8 @@ import { SCROLLBAR_STYLE, THEME } from './assets/theme';
 import './screens/home';
 import './screens/watch';
 import './screens/setting';
+import './components/layout/spinner-loading';
+import { AppConfig } from '../../preload/config.type';
 
 interface RouteItem {
   view: (params: RegExpExecArray) => unknown;
@@ -32,12 +34,22 @@ const ROUTES: Array<RouteItem & { regex: RegExp }> = [
 @customElement('app-router')
 export class AppRouter extends LitElement {
   @state()
+  isLoaded = false;
+
+  @state()
   view: unknown = undefined;
 
   constructor() {
     super();
     this._handleHashChange();
+    this._waitConfig();
   }
+
+  private _waitConfig = async () => {
+    const config: AppConfig['app'] = await window.api.getAppConfig();
+    window.__appConfig = config;
+    this.isLoaded = true;
+  };
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -68,10 +80,14 @@ export class AppRouter extends LitElement {
         display: block;
         height: 100vh;
       }
+      spinner-loading {
+        height: 100vh;
+      }
     `
   ];
 
   protected render(): unknown {
+    if (!this.isLoaded) return html`<spinner-loading></spinner-loading>`;
     if (this.view !== undefined) return this.view;
     return html`NOT FOUND!`;
   }

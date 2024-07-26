@@ -13,7 +13,7 @@ const api: API = {
   getIptvView: () => ipcRenderer.invoke('getIptvView'),
   clearAllCache: () => ipcRenderer.invoke('clearAllCache'),
   getAppConfig: () => ipcRenderer.invoke('getAppConfig'),
-  setAppConfig: (newCfg) => ipcRenderer.invoke('setAppConfig', newCfg)
+  setAppConfig: (newCfg, relaunchHash) => ipcRenderer.invoke('setAppConfig', newCfg, relaunchHash)
 };
 
 if (process.contextIsolated) {

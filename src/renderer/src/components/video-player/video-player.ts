@@ -22,6 +22,7 @@ import '../layout/spinner-loading';
 import './player-error';
 import Hls, { ErrorDetails, Events, Level, MediaPlaylist } from 'hls.js';
 import { channelName } from '../../utils/channel';
+import '../layout/app-titlebar';
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -323,14 +324,6 @@ export class VideoPlayer extends LitElement {
       position: relative;
       overflow: hidden;
     }
-    #titlebar {
-      position: fixed;
-      height: env(titlebar-area-height, 30px);
-      -webkit-app-region: drag;
-      top: 0;
-      left: 0;
-      right: 0;
-    }
     #video-container {
       height: 100%;
       width: 100%;
@@ -446,7 +439,7 @@ export class VideoPlayer extends LitElement {
     const _visibleClass = this._isControlVisible || this._isMouseOverControl ? 'visible' : '';
 
     return html`<div id="video-container">
-        <div id="titlebar"></div>
+        <app-titlebar class="fixed no-border"></app-titlebar>
         ${VideoPlayer._video}
         <player-error
           .details=${this.error}

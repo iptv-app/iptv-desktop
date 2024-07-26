@@ -10,6 +10,7 @@ import { ECustomEvent } from '../utils/event';
 import './layout/page-title';
 import './form/search-input';
 import './layout/spinner-loading';
+import './layout/empty-list';
 import { channelName } from '../utils/channel';
 
 @customElement('channel-list')
@@ -207,8 +208,14 @@ export class ChannelList extends LitElement {
       </header>
       ${this._channelList.render({
         pending: () => html`<spinner-loading></spinner-loading>`,
-        complete: (channels) =>
-          html`<div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
+        complete: (channels) => {
+          if (channels.length === 0)
+            return html`<empty-list
+              text="${this.code
+                ? 'The channel list is empty!'
+                : 'Choose ' + this.filter + ' first!'}"
+            ></empty-list>`;
+          return html`<div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
             ${channels
               .filter(
                 (item) =>
@@ -228,7 +235,8 @@ export class ChannelList extends LitElement {
                   .name="${channelName(channel)}"
                 ></channel-item>`;
               })}
-          </div>`
+          </div>`;
+        }
       })}
     `;
   }
