@@ -268,7 +268,7 @@ export class VideoPlayer extends LitElement {
         VideoPlayer._video.requestPictureInPicture();
       }
     } else {
-      await document.exitFullscreen();
+      await document.exitPictureInPicture();
     }
   };
   private _updatePip = async () => {

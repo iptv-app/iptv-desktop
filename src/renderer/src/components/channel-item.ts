@@ -36,6 +36,7 @@ export class ChannelItem extends LitElement {
       cursor: pointer;
       gap: 15px;
       user-select: none;
+      min-width: 0;
     }
     :host(.vertical) {
       flex-direction: row;
