@@ -13,7 +13,11 @@ const api: API = {
   getIptvView: () => ipcRenderer.invoke('getIptvView'),
   clearAllCache: () => ipcRenderer.invoke('clearAllCache'),
   getAppConfig: () => ipcRenderer.invoke('getAppConfig'),
-  setAppConfig: (newCfg, relaunchHash) => ipcRenderer.invoke('setAppConfig', newCfg, relaunchHash)
+  setAppConfig: (newCfg, relaunchHash) => ipcRenderer.invoke('setAppConfig', newCfg, relaunchHash),
+  toggleFavorite: (channelId) => ipcRenderer.invoke('toggleFavorite', channelId),
+  getFavorites: () => ipcRenderer.invoke('getFavorites'),
+  resolveChannelLogo: (channelId, failedLogo) =>
+    ipcRenderer.invoke('resolveChannelLogo', channelId, failedLogo)
 };
 
 if (process.contextIsolated) {

@@ -1,11 +1,13 @@
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
+import { defineConfig } from 'electron-vite';
 import minifyHTML from 'rollup-plugin-html-literals';
 import summary from 'rollup-plugin-summary';
 
 export default defineConfig(({ mode }) => ({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [],
     build: {
+      externalizeDeps: true,
+      bytecode: true,
       rollupOptions: {
         output: {
           format: 'es'
@@ -15,8 +17,10 @@ export default defineConfig(({ mode }) => ({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [],
     build: {
+      externalizeDeps: true,
+      bytecode: true,
       rollupOptions: {
         output: {
           format: 'es'

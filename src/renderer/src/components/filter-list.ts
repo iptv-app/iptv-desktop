@@ -81,6 +81,10 @@ export class FilterList extends LitElement {
           results = reslang.map((item) => ({ code: item.code, label: item.name }));
           break;
 
+        case 'favorites':
+          results = [{ code: 'all', label: 'All Favorites', icon: '❤️' }];
+          break;
+
         default:
           results = [];
       }

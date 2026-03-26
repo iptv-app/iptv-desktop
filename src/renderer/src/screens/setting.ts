@@ -4,7 +4,7 @@ import '../components/layout/page-title';
 import { AppConfig } from '../../../preload/config.type';
 import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
-import { AppWindow, Captions, Globe, TvMinimalPlay } from 'lucide-static';
+import { AppWindow, Captions, Clock, Globe, TvMinimalPlay } from 'lucide-static';
 import '../components/layout/list-item';
 import '../components/form/text-input';
 import '../components/form/app-button';
@@ -36,6 +36,15 @@ const cacheDurationOptions: Option[] = [
   }
 ];
 
+const timeshiftBufferOptions: Option[] = [
+  { label: '5 Minutes', value: '5' },
+  { label: '10 Minutes', value: '10' },
+  { label: '20 Minutes', value: '20' },
+  { label: '30 Minutes', value: '30' },
+  { label: '45 Minutes', value: '45' },
+  { label: '60 Minutes', value: '60' }
+];
+
 interface Form {
   iptvIsOverrideApi?: boolean;
   iptvApiUrl?: string;
@@ -49,6 +58,9 @@ interface Form {
   captionIsEnableCEA708?: boolean;
 
   userInterfaceIsUseSystemTitlebar?: boolean;
+
+  timeshiftIsEnabled?: boolean;
+  timeshiftBufferMinutes?: string;
 }
 
 @customElement('setting-screen')
@@ -69,7 +81,10 @@ export class SettingScreen extends LitElement {
     captionIsAutoShow: undefined,
     captionIsEnableCEA708: undefined,
 
-    userInterfaceIsUseSystemTitlebar: undefined
+    userInterfaceIsUseSystemTitlebar: undefined,
+
+    timeshiftIsEnabled: undefined,
+    timeshiftBufferMinutes: undefined
   };
 
   constructor() {
@@ -93,7 +108,10 @@ export class SettingScreen extends LitElement {
       captionIsAutoShow: config?.caption?.isAutoShow,
       captionIsEnableCEA708: config?.caption?.isEnableCEA708,
 
-      userInterfaceIsUseSystemTitlebar: config?.userInterface?.isUseSystemTitlebar
+      userInterfaceIsUseSystemTitlebar: config?.userInterface?.isUseSystemTitlebar,
+
+      timeshiftIsEnabled: config?.timeshift?.isEnabled,
+      timeshiftBufferMinutes: config?.timeshift?.bufferMinutes?.toString()
     };
   };
 
@@ -123,6 +141,10 @@ export class SettingScreen extends LitElement {
       },
       userInterface: {
         isUseSystemTitlebar: val.userInterfaceIsUseSystemTitlebar
+      },
+      timeshift: {
+        isEnabled: val.timeshiftIsEnabled,
+        bufferMinutes: val.timeshiftBufferMinutes ? parseInt(val.timeshiftBufferMinutes) : undefined
       }
     };
     window.api.setAppConfig(dto, window.location.hash.substring(1));
@@ -231,6 +253,11 @@ export class SettingScreen extends LitElement {
       label: 'User Interface',
       id: 'user-interface',
       icon: AppWindow
+    },
+    {
+      label: 'Timeshift',
+      id: 'timeshift',
+      icon: Clock
     }
   ];
 
@@ -324,6 +351,21 @@ export class SettingScreen extends LitElement {
               <p>Use default system titlebar instead of custom one.<label>
             </div>
             <toggle-switch ?checked=${this._form.userInterfaceIsUseSystemTitlebar} @change=${(e: CustomEvent) => this._handleChange('userInterfaceIsUseSystemTitlebar', e.detail)}></toggle-switch>
+          </div>
+        </fieldset>
+        <fieldset>
+          <h2 id="timeshift">Timeshift</h2>
+          <div class="item flex">
+            <div>
+              <label>Enable Timeshift</label>
+              <p>Pause, rewind and resume live TV. Requires restarting playback after saving.</p>
+            </div>
+            <toggle-switch ?checked=${this._form.timeshiftIsEnabled} @change=${(e: CustomEvent) => this._handleChange('timeshiftIsEnabled', e.detail)}></toggle-switch>
+          </div>
+          <div class="item">
+            <label>Buffer Size</label>
+            <p>How many minutes of live TV to keep in memory for rewinding.</p>
+            <select-item ?disabled=${!this._form.timeshiftIsEnabled} .value=${this._form.timeshiftBufferMinutes} .options=${timeshiftBufferOptions} @change=${(e: CustomEvent) => this._handleChange('timeshiftBufferMinutes', e.detail)}></select-item>
           </div>
         </fieldset>
         <div class="right"><app-button class="primary" @click=${this._doSave}>Save Settings</app-button></div>

@@ -41,4 +41,4 @@ export type IPTVStream = {
 export type IPTVChannelWithStream = IPTVChannel & {
   streams: IPTVStream[];
 };
-export type FILTER_TYPE = 'country' | 'category' | 'language';
+export type FILTER_TYPE = 'country' | 'category' | 'language' | 'favorites';

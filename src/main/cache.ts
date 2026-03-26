@@ -7,8 +7,10 @@ export enum ECache {
   COUNTRIES = 'APPCACHE_countries',
   CATEGORIES = 'APPCACHE_categories',
   LANGUAGES = 'APPCACHE_languages',
+  LOGOS = 'APPCACHE_logos',
   CHANNELS = 'APPCACHE_channels',
-  STREAMS = 'APPCACHE_streams'
+  STREAMS = 'APPCACHE_streams',
+  CHANNEL_LOGOS = 'APPCACHE_channel_logos'
 }
 
 const getPath = (type: ECache) => join(app.getPath('userData'), type + '.json');

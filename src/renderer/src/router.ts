@@ -13,7 +13,7 @@ interface RouteItem {
 
 const ROUTES: Array<RouteItem & { regex: RegExp }> = [
   {
-    regex: /^home\/(country|category|language)\/(.*?)\/(.*?)$/,
+    regex: /^home\/(country|category|language|favorites)\/(.*?)\/(.*?)$/,
     view: (params) =>
       html`<watch-screen
         filter="${params[1]}"
@@ -22,7 +22,7 @@ const ROUTES: Array<RouteItem & { regex: RegExp }> = [
       ></watch-screen>`
   },
   {
-    regex: /^home\/?(country|category|language)?\/?(.*?)?$/,
+    regex: /^home\/?(country|category|language|favorites)?\/?(.*?)?$/,
     view: (params) => html`<home-screen filter="${params[1]}" code="${params[2]}"></home-screen>`
   },
   {

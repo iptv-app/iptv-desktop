@@ -16,6 +16,9 @@ export class SelectButton extends LitElement {
   @property()
   value?: SelectButtonOption['value'];
 
+  @property()
+  placement: 'top' | 'bottom' = 'top';
+
   @state()
   _isOpen = false;
 
@@ -55,10 +58,18 @@ export class SelectButton extends LitElement {
           opacity 0.1s ease;
         max-height: 200px;
         overflow-y: auto;
+        z-index: 20;
       }
       ul.open {
         opacity: 1;
         transform: scaleY(1) translateY(-100%);
+      }
+      ul.bottom {
+        top: calc(100% + 8px);
+        transform: scaleY(0) translateY(0);
+      }
+      ul.bottom.open {
+        transform: scaleY(1) translateY(0);
       }
       li {
         padding: 8px;
@@ -81,7 +92,7 @@ export class SelectButton extends LitElement {
 
   protected render(): unknown {
     return html`<div class="container">
-      <ul class=${this._isOpen ? 'open' : ''}>
+      <ul class="${this._isOpen ? 'open' : ''} ${this.placement === 'bottom' ? 'bottom' : ''}">
         ${this.options?.map(
           (item) =>
             html`<li

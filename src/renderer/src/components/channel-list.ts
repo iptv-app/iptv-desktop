@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { FILTER_TYPE } from '../../../preload/iptv.type';
+import { FILTER_TYPE, IPTVCategory, IPTVChannel, IPTVCountry } from '../../../preload/iptv.type';
 import { Task } from '@lit/task';
 import './channel-item';
 import { THEME } from '../assets/theme';
@@ -9,9 +9,11 @@ import { waitForElement } from '../utils/dom';
 import { ECustomEvent } from '../utils/event';
 import './layout/page-title';
 import './form/search-input';
+import './form/select-item';
 import './layout/spinner-loading';
 import './layout/empty-list';
 import { channelName } from '../utils/channel';
+import { Option } from './form/select-item';
 
 @customElement('channel-list')
 export class ChannelList extends LitElement {
@@ -36,13 +38,32 @@ export class ChannelList extends LitElement {
   @state()
   _searchDebounced: string = '';
 
+  @state()
+  _favorites: string[] = [];
+
+  @state()
+  _countryFilter: string = 'all';
+
+  @state()
+  _categoryFilter: string = 'all';
+
+  @state()
+  _countryOptions: Option[] = [{ label: 'All Countries', value: 'all' }];
+
+  @state()
+  _categoryOptions: Option[] = [{ label: 'All Categories', value: 'all' }];
+
   private _channelList = new Task(this, {
     task: async ([filter, code]) => {
       this._search = '';
       this._searchDebounced = '';
       if (!filter || !code) return [];
 
-      const result = await window.api.getFilteredActiveChannel(filter as FILTER_TYPE, code);
+      const [result, favs] = await Promise.all([
+        window.api.getFilteredActiveChannel(filter as FILTER_TYPE, code),
+        window.api.getFavorites()
+      ]);
+      this._favorites = favs;
       return result;
     },
     args: () => [this.filter, this.code]
@@ -58,6 +79,13 @@ export class ChannelList extends LitElement {
       this._searchDebounced = val;
     }
   };
+  private _onChangeCountryFilter = (e: CustomEvent) => {
+    this._countryFilter = e.detail;
+  };
+
+  private _onChangeCategoryFilter = (e: CustomEvent) => {
+    this._categoryFilter = e.detail;
+  };
 
   private _onClickChannel = (channelId: string) => {
     navigate(`home/${this.filter}/${this.code}/${channelId}`);
@@ -68,9 +96,88 @@ export class ChannelList extends LitElement {
     super.connectedCallback();
     window.addEventListener(ECustomEvent.nextChannel, () => this._handleChannelEvent('next'));
     window.addEventListener(ECustomEvent.prevChannel, () => this._handleChannelEvent('prev'));
+    void this._loadFilterOptions();
     if (this.activeChannelId) {
       this._scrollToChannelId(this.activeChannelId);
     }
+  }
+
+  private _loadFilterOptions = async () => {
+    const [countries, categories] = await Promise.all([
+      window.api.getAllCountry(),
+      window.api.getAllCategory()
+    ]);
+    this._countryOptions = [
+      { label: 'All Countries', value: 'all' },
+      ...countries
+        .map((item: IPTVCountry) => ({ label: `${item.flag} ${item.name}`, value: item.code }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    ];
+    this._categoryOptions = [
+      { label: 'All Categories', value: 'all' },
+      ...categories
+        .map((item: IPTVCategory) => ({ label: item.name, value: item.id }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    ];
+  };
+
+  private _fuzzyScore(sourceRaw: string, queryRaw: string) {
+    const source = sourceRaw.toLowerCase();
+    const query = queryRaw.trim().toLowerCase();
+    if (!query) return 1;
+    if (source.includes(query)) {
+      return 10 + query.length / source.length;
+    }
+    let queryIdx = 0;
+    let score = 0;
+    let streak = 0;
+    for (let i = 0; i < source.length; i++) {
+      if (source[i] === query[queryIdx]) {
+        queryIdx += 1;
+        streak += 1;
+        score += 1 + streak * 0.5;
+        if (queryIdx === query.length) break;
+      } else {
+        streak = 0;
+      }
+    }
+    if (queryIdx !== query.length) return 0;
+    return score / source.length;
+  }
+
+  private _channelSearchScore(channel: IPTVChannel) {
+    const query = this._searchDebounced;
+    if (!query) return 1;
+    const searchableValues = [
+      channel.name,
+      channel.alt_names.join(' '),
+      channel.id,
+      channel.country,
+      channel.categories.join(' ')
+    ];
+    return searchableValues.reduce((best, text) => Math.max(best, this._fuzzyScore(text, query)), 0);
+  }
+
+  private _isChannelVisible(channel: IPTVChannel) {
+    const isCountryMatched = this._countryFilter === 'all' || channel.country === this._countryFilter;
+    const isCategoryMatched =
+      this._categoryFilter === 'all' || channel.categories.includes(this._categoryFilter);
+    const searchScore = this._channelSearchScore(channel);
+    const isSearchMatched = !this._searchDebounced || searchScore > 0;
+    return isCountryMatched && isCategoryMatched && isSearchMatched;
+  }
+
+  private _getVisibleChannels(channels: readonly IPTVChannel[]): IPTVChannel[] {
+    const isSearchEnabled = this._searchDebounced.trim().length > 0;
+    const filtered = channels.filter((channel) => this._isChannelVisible(channel));
+    if (!isSearchEnabled) return filtered;
+    return filtered
+      .map((channel) => ({
+        channel,
+        score: this._channelSearchScore(channel)
+      }))
+      .sort((a, b) => b.score - a.score)
+      .map((item) => item.channel);
   }
 
   private _scrollToChannelId = (channelId: string) => {
@@ -100,21 +207,21 @@ export class ChannelList extends LitElement {
 
   private _handleChannelEvent = (type: 'prev' | 'next') => {
     if (this.activeChannelId && this._channelList.value) {
-      const currentIdx = this._channelList.value.findIndex(
-        (item) => item.id === this.activeChannelId
-      );
+      const visibleChannels = this._getVisibleChannels(this._channelList.value);
+      if (visibleChannels.length === 0) return;
+      const currentIdx = visibleChannels.findIndex((item) => item.id === this.activeChannelId);
       if (type === 'prev') {
         var newIdx = currentIdx - 1;
         if (newIdx < 0) {
-          newIdx = this._channelList.value.length - 1;
+          newIdx = visibleChannels.length - 1;
         }
       } else {
         newIdx = currentIdx + 1;
-        if (newIdx >= this._channelList.value.length) {
+        if (newIdx >= visibleChannels.length) {
           newIdx = 0;
         }
       }
-      const channel = this._channelList.value[newIdx];
+      const channel = visibleChannels[newIdx];
       this._onClickChannel(channel.id);
       this._scrollToChannelId(channel.id);
     }
@@ -153,6 +260,13 @@ export class ChannelList extends LitElement {
     search-input {
       margin-top: 20px;
       max-width: 400px;
+    }
+    .search-filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      max-width: 600px;
     }
     #channel-grid {
       display: grid;
@@ -202,6 +316,20 @@ export class ChannelList extends LitElement {
               @changeDebounced=${this._onChangeSearchDebounced}
               placeholder="Search Channel..."
             />
+            <div class="search-filters">
+              <select-item
+                .value=${this._countryFilter}
+                .options=${this._countryOptions}
+                @change=${this._onChangeCountryFilter}
+                placeholder="Filter by country"
+              ></select-item>
+              <select-item
+                .value=${this._categoryFilter}
+                .options=${this._categoryOptions}
+                @change=${this._onChangeCategoryFilter}
+                placeholder="Filter by category"
+              ></select-item>
+            </div>
           </div>
           <slot name="right-component" />
         </div>
@@ -209,28 +337,35 @@ export class ChannelList extends LitElement {
       ${this._channelList.render({
         pending: () => html`<spinner-loading></spinner-loading>`,
         complete: (channels) => {
+          const visibleChannels = this._getVisibleChannels(channels);
           if (channels.length === 0)
             return html`<empty-list
               text="${this.code
                 ? 'The channel list is empty!'
                 : 'Choose ' + this.filter + ' first!'}"
             ></empty-list>`;
+          if (visibleChannels.length === 0)
+            return html`<empty-list text="No channels match your search and filters."></empty-list>`;
           return html`<div id="channel-grid" class="${this.isVertical ? 'vertical' : ''}">
-            ${channels
-              .filter(
-                (item) =>
-                  !this._searchDebounced ||
-                  (item.alt_names.join(' ') + ' ' + item.name)
-                    .toLowerCase()
-                    .includes(this._searchDebounced.toLowerCase())
-              )
-              .map((channel) => {
+            ${visibleChannels.map((channel) => {
                 return html`<channel-item
                   channelId="${channel.id}"
                   class="${this.isVertical ? 'vertical' : ''} ${this.activeChannelId === channel.id
                     ? 'active'
                     : ''}"
                   @click="${() => this._onClickChannel(channel.id)}"
+                  ?isFavorite="${this._favorites.includes(channel.id)}"
+                  @favorite-toggled="${(e: CustomEvent) => {
+                    const { channelId, isFavorite } = e.detail;
+                    if (isFavorite) {
+                      this._favorites = [...this._favorites, channelId];
+                    } else {
+                      this._favorites = this._favorites.filter(id => id !== channelId);
+                      if (this.filter === 'favorites') {
+                        this._channelList.run([this.filter, this.code]);
+                      }
+                    }
+                  }}"
                   .logo="${channel.logo}"
                   .name="${channelName(channel)}"
                 ></channel-item>`;

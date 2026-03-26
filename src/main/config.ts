@@ -22,6 +22,10 @@ export const defaultAppConifg: AppConfig['app'] = {
   },
   userInterface: {
     isUseSystemTitlebar: process.platform === 'linux' ? true : false
+  },
+  timeshift: {
+    isEnabled: false,
+    bufferMinutes: 30
   }
 };
 
@@ -29,6 +33,7 @@ const initialValue: AppConfig = {
   iptvView: {
     filter: 'country'
   },
+  favorites: [],
   app: undefined
 };
 class LowWithLodash<T> extends LowSync<T> {

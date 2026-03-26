@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { PropertyValues } from 'lit';
 import '../components/filter-list';
 import { SCROLLBAR_STYLE, THEME } from '../assets/theme';
 import { FILTER_TYPE } from '../../../preload/iptv.type';
@@ -22,8 +23,9 @@ export class HomeScreen extends LitElement {
   private _onChangeFilter = (e: CustomEvent) => {
     const newFilter = e.detail.filter;
     if (newFilter !== this.filter) {
-      navigate('home/' + newFilter);
-      window.api.setIptvView(newFilter);
+      const newCode = newFilter === 'favorites' ? 'all' : undefined;
+      navigate('home/' + newFilter + (newCode ? '/' + newCode : ''));
+      window.api.setIptvView(newFilter, newCode);
     }
   };
 
@@ -34,6 +36,13 @@ export class HomeScreen extends LitElement {
       window.api.setIptvView(this.filter, newCode);
     }
   };
+
+  protected updated(_changedProperties: PropertyValues): void {
+    if (this.filter === 'favorites' && !this.code) {
+      navigate('home/favorites/all');
+      window.api.setIptvView('favorites', 'all');
+    }
+  }
 
   static styles = [
     SCROLLBAR_STYLE,

@@ -8,7 +8,8 @@ import { FILTER_TYPE } from '../../../preload/iptv.type';
 const TYPES: { [key in FILTER_TYPE]: string } = {
   country: 'Country',
   category: 'Category',
-  language: 'Language'
+  language: 'Language',
+  favorites: 'Favorites'
 };
 
 @customElement('filter-select')
